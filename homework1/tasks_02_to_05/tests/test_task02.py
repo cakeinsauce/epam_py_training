@@ -11,7 +11,7 @@ from tasks_02_to_05.task02 import check_fibonacci
         ([0], True),
         ([1], True),
         ([4], False),
-        ([0, 0], False),  ### 4
+        ([0, 0], False),
         ([0, 1], True),
         ([0, 3], False),
         ([1, 1], True),
