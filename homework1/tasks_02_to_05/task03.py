@@ -17,4 +17,7 @@ from typing import Tuple
 
 
 def find_maximum_and_minimum(file_name: str) -> Tuple[int, int]:
-    ...
+    """Return a tuple with min, max values."""
+    with open(file_name, "r") as fi:
+        num_list = [int(n) for n in fi if not n.isspace()]
+    return min(num_list), max(num_list)
