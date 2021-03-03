@@ -28,6 +28,7 @@ from tasks_02_to_05.task02 import check_fibonacci
     ],
 )
 def test_fibonacci(value: Sequence[int], expected_result: bool):
+    # Testing sub-sequence
     actual_result = check_fibonacci(value)
 
     assert actual_result == expected_result

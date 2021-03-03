@@ -28,6 +28,7 @@ def create_test_data(min_v, max_v, length=10, file="test_min_max_file.txt"):
 def test_find_maximum_and_minimum(
     value: Tuple[int, int], expected_result: Tuple[int, int]
 ):
+    # Simple smoke-test
     create_test_data(*value)
     actual_result = find_maximum_and_minimum("test_min_max_file.txt")
 
