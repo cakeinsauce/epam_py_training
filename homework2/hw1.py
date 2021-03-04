@@ -10,6 +10,8 @@ from collections import Counter
 from string import punctuation
 from typing import List
 
+# All functions have been written to work with the given text.
+
 
 def get_file_data(file_path: str) -> str:
     """Return encoded unicode-escaped text."""
@@ -43,7 +45,7 @@ def get_longest_diverse_words(file_path: str) -> List[str]:
 def get_rarest_char(file_path: str) -> str:
     """Return rarest symbol for a document."""
     alphanum_text = [
-        c for c in get_file_data(file_path) if c.isalnum()
+        c.lower() for c in get_file_data(file_path) if c.isalnum()
     ]  # Create list only with letters and numbers
     return Counter(alphanum_text).most_common()[-1][
         0
@@ -71,15 +73,8 @@ def count_non_ascii_chars(file_path: str) -> int:
 def get_most_common_non_ascii_char(file_path: str) -> str:
     """Return most common non-ascii char for a document"""
     non_ascii_text = [
-        c for c in get_file_data(file_path) if not c.isascii()
+        c.lower() for c in get_file_data(file_path) if not c.isascii()
     ]  # Create list only with non-ascii chars
     return Counter(non_ascii_text).most_common()[0][
         0
     ]  # Get 1st tuple and its 1st element that is a letter
-
-
-# print(get_longest_diverse_words("data.txt"))
-# print(get_rarest_char("data.txt"))
-# print(count_punctuation_chars("data.txt"))
-# print(count_non_ascii_chars("data.txt"))
-# print(get_most_common_non_ascii_char("data.txt"))
