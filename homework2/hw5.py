@@ -14,3 +14,11 @@ assert = custom_range(string.ascii_lowercase, 'g', 'p') == ['g', 'h', 'i', 'j', 
 assert = custom_range(string.ascii_lowercase, 'p', 'g', -2) == ['p', 'n', 'l', 'j', 'h']
 
 """
+from collections.abc import Hashable, Iterable
+
+
+def custom_range(
+    iter_seq: Iterable, stop: Hashable, start: Hashable = None, step: int = 1
+) -> Iterable:
+    """Implement range-like function for any iterable object."""
+    pass
