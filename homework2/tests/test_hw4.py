@@ -1,5 +1,4 @@
 import time
-from collections import Callable
 from typing import Tuple
 
 import pytest
