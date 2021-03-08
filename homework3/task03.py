@@ -26,7 +26,7 @@ def make_filter(**keywords):
     filter_funcs = []
     for key, value in keywords.items():
 
-        def keyword_filter_func(object_value):
+        def keyword_filter_func(object_value, key=key, value=value):
             return object_value[key] == value
 
         filter_funcs.append(keyword_filter_func)
@@ -43,6 +43,6 @@ sample_data = [
     {"is_dead": True, "kind": "parrot", "type": "bird", "name": "polly"},
 ]
 
-# print(make_filter(name='polly', type='bird').apply(sample_data))  # should return only second entry from the list
+# print(make_filter(name='Bill', type='person').apply(sample_data))  # should return only second entry from the list
 
 # There are multiple bugs in this code. Find them all and write tests for faulty cases.
