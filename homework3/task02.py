@@ -7,11 +7,10 @@ You are not allowed to modify slow_calculate function.
 """
 
 import hashlib
+import multiprocessing
 import random
 import struct
 import time
-
-start_time = time.perf_counter()
 
 
 def slow_calculate(value):
@@ -21,6 +20,7 @@ def slow_calculate(value):
     return sum(struct.unpack("<" + "B" * len(data), data))
 
 
-finish_time = time.perf_counter()
-
-print(f"Finished in {round(finish_time-start_time, 2)} second(s)")
+def slow_calculate_sum(pool_size: int = 50) -> int:
+    """Return sum of slow_calculate of all numbers from 0 to 500."""
+    with multiprocessing.Pool(pool_size) as executor:
+        return sum(executor.map(slow_calculate, range(501)))
