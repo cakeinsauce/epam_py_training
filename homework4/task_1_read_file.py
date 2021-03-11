@@ -25,6 +25,16 @@ You will learn:
 **** https://docs.python.org/3/tutorial/errors.html#raising-exceptions
 """
 
+import os
+
 
 def read_magic_number(path: str) -> bool:
-    ...
+    """Return True if a number is in [1, 3)."""
+    if not path or not os.path.exists(path):  # No such file or directory.
+        raise FileNotFoundError
+
+    try:
+        with open(path, "r") as f:
+            return 1 <= float(f.readline()) < 3
+    except:
+        raise ValueError
