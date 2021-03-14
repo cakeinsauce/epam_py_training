@@ -26,6 +26,15 @@ You will learn:
 * https://docs.python.org/3/library/urllib.request.html#urllib.request.urlopen
 """
 
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
+
 
 def count_dots_on_i(url: str) -> int:
-    ...
+    """Return quantity of i's (dots on i's if you wish) in the html."""
+    try:
+        # with urlopen(url) as response:  # Getting url's html body.
+        html = urlopen(url).read().decode("utf-8")
+        return html.count("i")
+    except (URLError, HTTPError):
+        raise ValueError("Unreachable {url}")  # For easier testing.
