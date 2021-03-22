@@ -25,7 +25,7 @@ You will learn:
  - how to write instructions
 
 
->>> fizzbuzz(5)
+#>>> fizzbuzz(5)
 ["1", "2", "fizz", "4", "buzz"]
 
 * https://en.wikipedia.org/wiki/Fizz_buzz
@@ -35,4 +35,16 @@ from typing import List
 
 
 def fizzbuzz(n: int) -> List[str]:
-    pass
+    """Return N FizzBuzz numbers.
+
+    >>> fizzbuzz(5)
+    ['1', '2', 'fizz', '4', 'buzz']
+    >>> fizzbuzz(0)
+    []
+    >>> fizzbuzz(-5)
+    []
+    """
+    return [
+        "fizz" * (not num % 3) + "buzz" * (not num % 5) or str(num)
+        for num in range(1, n + 1)
+    ]
