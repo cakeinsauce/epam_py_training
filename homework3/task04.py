@@ -16,11 +16,12 @@ Write a function that detects if a number is Armstrong number in functionaly sty
 
 ### Example function signature and call
 """
+from functools import reduce
 
 
 def is_armstrong(number: int) -> bool:
-    ...
-
-
-assert is_armstrong(153) == True, "Is Armstrong number"
-assert is_armstrong(10) == False, "Is not Armstrong number"
+    """Return true if number is an Armstrong number."""
+    str_num = str(number)
+    return number >= 0 and number == reduce(
+        lambda a, b: a + b, [int(d) ** len(str_num) for d in str_num]
+    )
