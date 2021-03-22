@@ -24,6 +24,15 @@ You will learn:
 
 """
 
+import sys
+
 
 def my_precious_logger(text: str):
-    pass
+    """Write text to stderr if line starts with 'error', to stdout otherwise."""
+    stderr = sys.stderr
+    stdout = sys.stdout
+
+    if text[:5].lower() == "error":
+        stderr.write(text)
+    else:
+        stdout.write(text)
