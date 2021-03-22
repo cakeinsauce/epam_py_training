@@ -21,5 +21,7 @@ Definition of done:
 from typing import Generator, List
 
 
-def fizzbuzz(n: int) -> Generator[str]:
-    pass
+def fizzbuzz(n: int) -> Generator[str, None, None]:
+    """Return a generator that yields N FizzBuzz numbers."""
+    for num in range(1, n + 1):
+        yield "fizz" * (not num % 3) + "buzz" * (not num % 5) or str(num)
