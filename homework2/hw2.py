@@ -17,8 +17,14 @@ Input: [2,2,1,1,1,2,2]
 Output: 2, 1
 
 """
+from collections import Counter
 from typing import List, Tuple
 
 
 def major_and_minor_elem(inp: List) -> Tuple[int, int]:
-    ...
+    """Return the most common that appears more than n//2 times and the least common elements."""
+    inp_len = len(inp)
+    elements = Counter(inp).most_common()
+    for el in elements:
+        if el[1] > inp_len // 2:
+            return el[0], elements[-1][0]
