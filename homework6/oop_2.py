@@ -75,7 +75,10 @@ class DeadlineError(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"Deadline: {self.homework.created + self.homework.deadline}, Now: {dt.datetime.today()} --> {self.message}"
+        return (
+            f"Deadline: {self.homework.created + self.homework.deadline}, "
+            f"Now: {dt.datetime.today()} --> {self.message}"
+        )
 
 
 class Person:
@@ -114,7 +117,8 @@ class Teacher(Person):
 
     @staticmethod
     def check_homework(homework_result: "HomeworkResult") -> bool:
-        """Return True if homework solution is more than 5 characters and add homework_result to homework_done otherwise just return False."""
+        """Return True if homework solution is more than 5 characters and
+        add homework_result to homework_done otherwise just return False."""
 
         if len(homework_result.solution) <= 5:
             return False
