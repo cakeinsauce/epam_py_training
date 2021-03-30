@@ -47,7 +47,7 @@ def tic_tac_toe_checker(board: List[List]) -> str:
     ):  # Check for diagonal winning combinations.
         return f"{board[1][1]} wins!"
 
-    if unfinished:  # unfinished: at least one '-'
+    if unfinished:  # Unfinished: at least one '-' and no winner yet.
         return "unfinished!"
-    else:  # draw: no '-',
+    else:  # Draw: no '-' and no winner.
         return "draw!"
