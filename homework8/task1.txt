@@ -2,4 +2,4 @@ name=kek
 last_name=top
 power=9001
 song=shadilay
-__dict__=1
+1=something
