@@ -30,7 +30,7 @@ class TableData:
         :param item: primary key
 
         :return: singe data row for a given primary key
-        :rtype: tuple
+        :rtype: tuple | None
         """
 
         cur = self.__connection.cursor()
