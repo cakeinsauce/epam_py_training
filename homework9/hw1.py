@@ -60,7 +60,9 @@ def merge_sorted_files(file_list: List[Union[Path, str]]) -> Iterator:
     num2 = next(f_o2, None)
 
     while num1 or num2:
-        if not num2 or (num1 and num1 <= num2):
+        if not num2 or (
+            num1 and num1 <= num2
+        ):  # Either num1 < num2 and not None, or num2 is None
             yield num1
             num1 = next(f_o1, None)
         else:
