@@ -37,23 +37,57 @@ PEP8 соблюдать строго.
 К названием остальных переменных, классов и тд. подходить ответственно -
 давать логичные подходящие имена.
 """
-import datetime
+import datetime as dt
+from typing import Union
 
-if __name__ == "__main__":
-    teacher = Teacher("Daniil", "Shadrin")
-    student = Student("Roman", "Petrov")
-    teacher.last_name  # Daniil
-    student.first_name  # Petrov
 
-    expired_homework = teacher.create_homework("Learn functions", 0)
-    expired_homework.created  # Example: 2019-05-26 16:44:30.688762
-    expired_homework.deadline  # 0:00:00
-    expired_homework.text  # 'Learn functions'
+class Homework:
+    """Homework class contains attributes about a homework."""
 
-    # create function from method and use it
-    create_homework_too = teacher.create_homework
-    oop_homework = create_homework_too("create 2 simple classes", 5)
-    oop_homework.deadline  # 5 days, 0:00:00
+    def __init__(self, text: str, deadline: dt.timedelta):
+        self.text = text
+        self.deadline = deadline
+        self.created = dt.datetime.today()
 
-    student.do_homework(oop_homework)
-    student.do_homework(expired_homework)  # You are late
+    def __str__(self):
+        return self.text
+
+    def is_active(self) -> bool:
+        """Return True if homework is not expired."""
+        return dt.datetime.today() < self.created + self.deadline
+
+
+class Student:
+    """Student class contains info about a student."""
+
+    def __init__(self, last_name, first_name):
+        self.last_name = last_name
+        self.first_name = first_name
+
+    def __str__(self):
+        return f"{self.last_name} {self.first_name}"
+
+    @staticmethod
+    def do_homework(homework: Homework) -> Union[Homework, None]:
+        """Return Homework object if it's not expired yet otherwise, None."""
+        if homework.is_active():
+            return homework
+        else:
+            print("You are late")
+            return None
+
+
+class Teacher:
+    """Teacher class contains info about a teacher."""
+
+    def __init__(self, last_name, first_name):
+        self.last_name = last_name
+        self.first_name = first_name
+
+    def __str__(self):
+        return f"{self.last_name} {self.first_name}"
+
+    @staticmethod
+    def create_homework(text, days):
+        """Return created Homework object."""
+        return Homework(text, dt.timedelta(days=days))
