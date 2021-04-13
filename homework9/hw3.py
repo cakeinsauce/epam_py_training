@@ -10,6 +10,7 @@ For dir with two files from hw1.py:
 6
 
 """
+import os
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -17,4 +18,22 @@ from typing import Callable, Optional
 def universal_file_counter(
     dir_path: Path, file_extension: str, tokenizer: Optional[Callable] = None
 ) -> int:
-    pass
+    """Return amount of lines in files with the given extension, if tokenizer is given, return amount of tokens."""
+    counter = 0
+    files_paths = []
+
+    for file in os.listdir(
+        dir_path
+    ):  # Creating list of files paths with the given extension.
+        if file.endswith("." + file_extension):
+            files_paths.append(dir_path.joinpath(file))
+
+    for path in files_paths:
+        with open(path, "r") as f_o:
+            for line in f_o:  # Parsing all lines in a file.
+                if tokenizer:
+                    counter += len(list(map(tokenizer, (line,))))
+                elif line != "\n":
+                    counter += 1
+
+    return counter
