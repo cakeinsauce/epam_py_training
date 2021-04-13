@@ -18,6 +18,7 @@ from typing import Callable, Optional
 def universal_file_counter(
     dir_path: Path, file_extension: str, tokenizer: Optional[Callable] = None
 ) -> int:
+    """Return amount of lines in files with the given extension, if tokenizer is given, return amount of tokens."""
     counter = 0
     files_paths = []
 
