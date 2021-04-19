@@ -3,3 +3,6 @@ black==20.8b1
 isort
 pytest
 pytest-sugar
+beautifulsoup4
+aiohttp
+lxml
