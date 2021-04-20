@@ -1,0 +1,82 @@
+[
+    {
+        "name": "Amazon",
+        "code": "AMZN",
+        "price": 256902.74,
+        "pe": 79.54,
+        "growth": 42.28,
+        "profit": 57.32
+    },
+    {
+        "name": "Alphabet C (ex Google",
+        "code": "GOOG",
+        "price": 174737.59,
+        "pe": 30.01,
+        "growth": 78.97,
+        "profit": 91.61
+    },
+    {
+        "name": "Alphabet A (ex Google",
+        "code": "GOOGL",
+        "price": 173742.55,
+        "pe": 30.0,
+        "growth": 78.67,
+        "profit": 91.21
+    },
+    {
+        "name": "Chipotle Mexican Grill",
+        "code": "CMG",
+        "price": 118030.79,
+        "pe": 129.05,
+        "growth": 86.21,
+        "profit": 104.6
+    },
+    {
+        "name": "AutoZone",
+        "code": "AZO",
+        "price": 115922.88,
+        "pe": 16.46,
+        "growth": 40.12,
+        "profit": 56.71
+    },
+    {
+        "name": "Mettler-Toledo International",
+        "code": "MTD",
+        "price": 97331.77,
+        "pe": 43.78,
+        "growth": 75.28,
+        "profit": 94.78
+    },
+    {
+        "name": "Intuitive Surgical",
+        "code": "ISRG",
+        "price": 61795.28,
+        "pe": 80.71,
+        "growth": 52.89,
+        "profit": 69.43
+    },
+    {
+        "name": "BlackRock",
+        "code": "BLK",
+        "price": 61415.2,
+        "pe": 20.99,
+        "growth": 64.6,
+        "profit": 83.42
+    },
+    {
+        "name": "Tesla",
+        "code": "TSLA",
+        "price": 54807.94,
+        "pe": 299.31,
+        "growth": 390.03,
+        "profit": 568.14
+    },
+    {
+        "name": "Equinix",
+        "code": "EQIX",
+        "price": 54468.15,
+        "pe": 169.88,
+        "growth": 3.44,
+        "profit": 43.13
+    }
+]

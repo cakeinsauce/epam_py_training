@@ -1,0 +1,82 @@
+[
+    {
+        "name": "Tesla",
+        "code": "TSLA",
+        "price": 54807.94,
+        "pe": 299.31,
+        "growth": 390.03,
+        "profit": 568.14
+    },
+    {
+        "name": "L Brands",
+        "code": "LB",
+        "price": 4944.05,
+        "pe": 11.45,
+        "growth": 382.01,
+        "profit": 671.7
+    },
+    {
+        "name": "Freeport-McMoRan",
+        "code": "FCX",
+        "price": 2808.01,
+        "pe": 46.28,
+        "growth": 354.5,
+        "profit": 435.62
+    },
+    {
+        "name": "Gap",
+        "code": "GPS",
+        "price": 2426.41,
+        "pe": -11.51,
+        "growth": 331.98,
+        "profit": 408.26
+    },
+    {
+        "name": "Enphase Energy",
+        "code": "ENPH",
+        "price": 11000.2,
+        "pe": 125.98,
+        "growth": 274.2,
+        "profit": 566.95
+    },
+    {
+        "name": "United Rentals",
+        "code": "URI",
+        "price": 24405.54,
+        "pe": 12.9,
+        "growth": 229.87,
+        "profit": 254.47
+    },
+    {
+        "name": "News",
+        "code": "NWSA",
+        "price": 2041.78,
+        "pe": 52.59,
+        "growth": 215.47,
+        "profit": 235.11
+    },
+    {
+        "name": "Align Technology",
+        "code": "ALGN",
+        "price": 45657.19,
+        "pe": 98.94,
+        "growth": 214.11,
+        "profit": 243.32
+    },
+    {
+        "name": "Tapestry",
+        "code": "TPR",
+        "price": 3401.69,
+        "pe": 13.55,
+        "growth": 203.88,
+        "profit": 308.51
+    },
+    {
+        "name": "Expedia",
+        "code": "EXPE",
+        "price": 13141.56,
+        "pe": -15.04,
+        "growth": 192.94,
+        "profit": 240.14
+    }
+]

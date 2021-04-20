@@ -1,0 +1,82 @@
+[
+    {
+        "name": "L Brands",
+        "code": "LB",
+        "price": 4944.05,
+        "pe": 11.45,
+        "growth": 382.01,
+        "profit": 671.7
+    },
+    {
+        "name": "Tesla",
+        "code": "TSLA",
+        "price": 54807.94,
+        "pe": 299.31,
+        "growth": 390.03,
+        "profit": 568.14
+    },
+    {
+        "name": "Enphase Energy",
+        "code": "ENPH",
+        "price": 11000.2,
+        "pe": 125.98,
+        "growth": 274.2,
+        "profit": 566.95
+    },
+    {
+        "name": "Freeport-McMoRan",
+        "code": "FCX",
+        "price": 2808.01,
+        "pe": 46.28,
+        "growth": 354.5,
+        "profit": 435.62
+    },
+    {
+        "name": "Gap",
+        "code": "GPS",
+        "price": 2426.41,
+        "pe": -11.51,
+        "growth": 331.98,
+        "profit": 408.26
+    },
+    {
+        "name": "Invesco",
+        "code": "IVZ",
+        "price": 2001.49,
+        "pe": 8.72,
+        "growth": 182.28,
+        "profit": 324.29
+    },
+    {
+        "name": "Discovery Communication a",
+        "code": "DISCA",
+        "price": 2761.64,
+        "pe": 9.18,
+        "growth": 62.49,
+        "profit": 321.01
+    },
+    {
+        "name": "Tapestry",
+        "code": "TPR",
+        "price": 3401.69,
+        "pe": 13.55,
+        "growth": 203.88,
+        "profit": 308.51
+    },
+    {
+        "name": "Discovery Communications",
+        "code": "DISCK",
+        "price": 2370.92,
+        "pe": 8.03,
+        "growth": 52.81,
+        "profit": 297.02
+    },
+    {
+        "name": "Occidental Petroleum",
+        "code": "OXY",
+        "price": 1835.01,
+        "pe": -4.41,
+        "growth": 82.45,
+        "profit": 281.69
+    }
+]
