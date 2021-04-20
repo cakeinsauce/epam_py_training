@@ -3,7 +3,7 @@ import heapq
 import json
 import time
 from collections import namedtuple
-from typing import List, Union
+from typing import List, NoReturn, Union
 
 import aiofiles
 import aiohttp
@@ -113,33 +113,33 @@ async def parse_company(
     return company_details
 
 
-async def write_to_json(file_name, data):
+async def write_to_json(file_name: str, data: List[dict]) -> NoReturn:
     """Write data to JSON file."""
     async with aiofiles.open(f"{file_name}.json", "w") as outfile:
         await outfile.write(json.dumps(data, indent=4))
 
 
-async def top_most_expensive(data):
+async def top_most_expensive(data: List[dict]) -> NoReturn:
     """Write to JSON 10 most expensive companies."""
     key = lambda x: x["price"] if x["price"] else -1
     top = heapq.nlargest(10, data, key=key)
     await write_to_json("most_expensive", top)
 
 
-async def top_lowest_pe(data):
+async def top_lowest_pe(data: List[dict]) -> NoReturn:
     """Write to JSON 10 companies with the best P/E ratio."""
     key = lambda x: x["pe"] if x["pe"] else 99999
     top = heapq.nsmallest(10, data, key=key)
     await write_to_json("lowest_pe", top)
 
 
-async def top_best_growth_rate(data):
+async def top_best_growth_rate(data: List[dict]) -> NoReturn:
     """Write to JSON 10 fastest growing companies for the last year."""
     top = heapq.nlargest(10, data, key=lambda x: x["growth"])
     await write_to_json("best_growth_rate", top)
 
 
-async def top_best_potential_profit(data):
+async def top_best_potential_profit(data: List[dict]) -> NoReturn:
     """Write to JSON 10 companies with the best potential profit."""
     key = lambda x: x["profit"] if x["profit"] else -999999
     top = heapq.nlargest(10, data, key=key)
