@@ -6,3 +6,4 @@ pytest-sugar
 beautifulsoup4
 aiohttp
 lxml
+aiofiles

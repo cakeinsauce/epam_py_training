@@ -1,8 +1,11 @@
 import asyncio
+import heapq
+import json
 import time
 from collections import namedtuple
 from typing import List, Union
 
+import aiofiles
 import aiohttp
 from bs4 import BeautifulSoup
 
@@ -37,10 +40,19 @@ async def get_exchange_rate() -> float:
 async def get_profit_rate(soup: BeautifulSoup) -> Union[float, None]:
     """Return annual profit rate in percents if it's there, None otherwise."""
     try:
-        side_chart = soup.find_all(class_="snapshot__highlow")[1].text.split()
+        a = (
+            soup.find(class_="snapshot__header", text="52 Week Low")
+            .parent.text.split()[0]
+            .replace(",", "")
+        )
+        b = (
+            soup.find(class_="snapshot__header", text="52 Week High")
+            .parent.text.split()[0]
+            .replace(",", "")
+        )
 
-        a = float(side_chart[0].replace(",", ""))
-        b = float(side_chart[4].replace(",", ""))
+        a = float(a)
+        b = float(b)
 
         profit = round((b - a) / a * 100, 2)
     except:
@@ -84,41 +96,70 @@ async def parse_company(
     """Return info about given company."""
     company_data = company.text.split()
 
-    name = company.find("a").get("title")
-    growth = float(company_data[-1][:-1])
-
     company_href = base_url + company.find("a").get("href")
-
     company_html = await fetch_all([company_href], loop)
-
     company_soup = BeautifulSoup(company_html[0], "lxml")
 
-    price = await get_price(company_soup, exch_rate)
+    name = company.find("a").get("title")
     code = company_soup.find(class_="price-section__category").text.split()[-1]
-    profit = await get_profit_rate(company_soup)
+    price = await get_price(company_soup, exch_rate)
     pe = await get_pe_ratio(company_soup)
+    growth = float(company_data[-1][:-1])
+    profit = await get_profit_rate(company_soup)
 
     Company = namedtuple("Company", "name code price pe growth profit")
 
-    return Company(name, code, price, pe, growth, profit)
+    company_details = Company(name, code, price, pe, growth, profit)._asdict()
+    return company_details
+
+
+async def write_to_json(file_name, data):
+    """Write data to JSON file."""
+    async with aiofiles.open(f"{file_name}.json", "w") as outfile:
+        await outfile.write(json.dumps(data, indent=4))
+
+
+async def top_most_expensive(data):
+    """Write to JSON 10 most expensive companies."""
+    key = lambda x: x["price"] if x["price"] else -1
+    top = heapq.nlargest(10, data, key=key)
+    await write_to_json("most_expensive", top)
+
+
+async def top_lowest_pe(data):
+    """Write to JSON 10 companies with the best P/E ratio."""
+    key = lambda x: x["pe"] if x["pe"] else 99999
+    top = heapq.nsmallest(10, data, key=key)
+    await write_to_json("lowest_pe", top)
+
+
+async def top_best_growth_rate(data):
+    """Write to JSON 10 fastest growing companies for the last year."""
+    top = heapq.nlargest(10, data, key=lambda x: x["growth"])
+    await write_to_json("best_growth_rate", top)
+
+
+async def top_best_potential_profit(data):
+    """Write to JSON 10 companies with the best potential profit."""
+    key = lambda x: x["profit"] if x["profit"] else -999999
+    top = heapq.nlargest(10, data, key=key)
+    await write_to_json("best_potential_profit", top)
 
 
 async def main():
-    LOOP = asyncio.get_event_loop()
-    BASE_URL = "https://markets.businessinsider.com"
+    loop = asyncio.get_event_loop()
+    base_url = "https://markets.businessinsider.com"
 
     companies_lists_urls = [
-        BASE_URL + f"/index/components/s&p_500?p={i}" for i in range(1, 11)
+        base_url + f"/index/components/s&p_500?p={i}" for i in range(1, 11)
     ]
 
-    print("Current exchange USD-RUB rate: {}".format(await get_exchange_rate()))
-
-    print("Name | Code | Price | P/E | Growth | Profit")
-    htmls = await fetch_all(companies_lists_urls, LOOP)
+    htmls = await fetch_all(companies_lists_urls, loop)
     exch_rate = await get_exchange_rate()
 
     async def one_iteration(company_page):
-        print(await parse_company(company_page, LOOP, BASE_URL, exch_rate))
+        res = await parse_company(company_page, loop, base_url, exch_rate)
+        return res
 
     coros = [
         one_iteration(company)
@@ -128,12 +169,14 @@ async def main():
         .find_all("tr")[1:]
     ]
 
-    await asyncio.gather(*coros)
+    result = await asyncio.gather(*coros)
 
-    #
-    # for html in htmls:
-    #     for company in BeautifulSoup(html, "lxml").find(class_="table table-small").find_all("tr")[1:]:
-    #         print(await parse_company(company, LOOP, BASE_URL, exch_rate))
+    await asyncio.gather(
+        top_most_expensive(result),
+        top_lowest_pe(result),
+        top_best_growth_rate(result),
+        top_best_potential_profit(result),
+    )
 
 
 if __name__ == "__main__":
