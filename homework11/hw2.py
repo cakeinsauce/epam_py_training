@@ -26,5 +26,20 @@ order_1 = Order(100, morning_discount)
 assert order_1.final_price() == 50
 
 order_2 = Order(100, elder_discount)
-assert order_1.final_price() == 10
+assert order_2.final_price() == 10
 """
+
+
+class Order:
+    """Class apply different discount strategies."""
+
+    discount = 0
+
+    def __init__(self, price, program=None):
+        self.price = price
+        self.program = program
+
+    def final_price(self):
+        if self.program:
+            self.program(self)
+        return self.price - self.price * self.discount
