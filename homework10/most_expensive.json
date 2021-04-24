@@ -2,81 +2,81 @@
     {
         "name": "Amazon",
         "code": "AMZN",
-        "price": 256902.74,
+        "price": 248972.84,
         "pe": 79.54,
-        "growth": 42.28,
+        "growth": 43.24,
         "profit": 57.32
     },
     {
         "name": "Alphabet C (ex Google",
         "code": "GOOG",
-        "price": 174737.59,
+        "price": 170869.46,
         "pe": 30.01,
-        "growth": 78.97,
-        "profit": 91.61
+        "growth": 88.57,
+        "profit": 88.16
     },
     {
         "name": "Alphabet A (ex Google",
         "code": "GOOGL",
-        "price": 173742.55,
+        "price": 169701.82,
         "pe": 30.0,
-        "growth": 78.67,
-        "profit": 91.21
+        "growth": 88.01,
+        "profit": 87.23
     },
     {
         "name": "Chipotle Mexican Grill",
         "code": "CMG",
-        "price": 118030.79,
+        "price": 111922.1,
         "pe": 129.05,
-        "growth": 86.21,
-        "profit": 104.6
+        "growth": 73.45,
+        "profit": 84.42
     },
     {
         "name": "AutoZone",
         "code": "AZO",
-        "price": 115922.88,
+        "price": 111572.94,
         "pe": 16.46,
-        "growth": 40.12,
-        "profit": 56.71
+        "growth": 38.33,
+        "profit": 55.22
     },
     {
         "name": "Mettler-Toledo International",
         "code": "MTD",
-        "price": 97331.77,
+        "price": 97848.87,
         "pe": 43.78,
-        "growth": 75.28,
-        "profit": 94.78
+        "growth": 61.83,
+        "profit": 99.24
     },
     {
         "name": "Intuitive Surgical",
         "code": "ISRG",
-        "price": 61795.28,
+        "price": 64989.79,
         "pe": 80.71,
-        "growth": 52.89,
-        "profit": 69.43
+        "growth": 63.32,
+        "profit": 81.66
     },
     {
         "name": "BlackRock",
         "code": "BLK",
-        "price": 61415.2,
+        "price": 59921.26,
         "pe": 20.99,
-        "growth": 64.6,
+        "growth": 56.05,
         "profit": 83.42
     },
     {
         "name": "Tesla",
         "code": "TSLA",
-        "price": 54807.94,
+        "price": 54277.55,
         "pe": 299.31,
-        "growth": 390.03,
-        "profit": 568.14
+        "growth": 423.5,
+        "profit": 559.1
     },
     {
         "name": "Equinix",
         "code": "EQIX",
-        "price": 54468.15,
+        "price": 53911.86,
         "pe": 169.88,
-        "growth": 3.44,
+        "growth": -4.82,
         "profit": 43.13
     }
 ]

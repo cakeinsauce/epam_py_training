@@ -54,7 +54,7 @@ async def get_profit_rate(soup: BeautifulSoup) -> Union[float, None]:
         a = float(a)
         b = float(b)
 
-        profit = round((b - a) / a * 100, 2)
+        profit = round((b - a) / a * 100)
     except:
         profit = None
     return profit
@@ -91,7 +91,10 @@ async def get_price(soup: BeautifulSoup, exch_rate: float) -> Union[float, None]
 
 
 async def parse_company(
-    company, loop: asyncio.AbstractEventLoop, base_url: str, exch_rate: float
+    company: BeautifulSoup,
+    loop: asyncio.AbstractEventLoop,
+    base_url: str,
+    exch_rate: float,
 ) -> namedtuple:
     """Return info about given company."""
     company_data = company.text.split()
@@ -113,33 +116,33 @@ async def parse_company(
     return company_details
 
 
-async def write_to_json(file_name: str, data: List[dict]) -> NoReturn:
+async def write_to_json(file_name: str, data: List[dict]):
     """Write data to JSON file."""
     async with aiofiles.open(f"{file_name}.json", "w") as outfile:
         await outfile.write(json.dumps(data, indent=4))
 
 
-async def top_most_expensive(data: List[dict]) -> NoReturn:
+async def top_most_expensive(data: List[dict]):
     """Write to JSON 10 most expensive companies."""
     key = lambda x: x["price"] if x["price"] else -1
     top = heapq.nlargest(10, data, key=key)
     await write_to_json("most_expensive", top)
 
 
-async def top_lowest_pe(data: List[dict]) -> NoReturn:
+async def top_lowest_pe(data: List[dict]):
     """Write to JSON 10 companies with the best P/E ratio."""
     key = lambda x: x["pe"] if x["pe"] else 99999
     top = heapq.nsmallest(10, data, key=key)
     await write_to_json("lowest_pe", top)
 
 
-async def top_best_growth_rate(data: List[dict]) -> NoReturn:
+async def top_best_growth_rate(data: List[dict]):
     """Write to JSON 10 fastest growing companies for the last year."""
     top = heapq.nlargest(10, data, key=lambda x: x["growth"])
     await write_to_json("best_growth_rate", top)
 
 
-async def top_best_potential_profit(data: List[dict]) -> NoReturn:
+async def top_best_potential_profit(data: List[dict]):
     """Write to JSON 10 companies with the best potential profit."""
     key = lambda x: x["profit"] if x["profit"] else -999999
     top = heapq.nlargest(10, data, key=key)
