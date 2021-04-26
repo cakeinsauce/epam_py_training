@@ -14,12 +14,11 @@ def add_data(apps, schema_editor):
     teacher = apps.get_model("hw12", "Teacher")(
         last_name="Shevyakhova", first_name="Arina"
     )
-    for data in hw, student, teacher:
-        data.save()
     hw_result = apps.get_model("hw12", "HomeworkResult")(
         solution="Solved", homework=hw, author=student
     )
-    hw_result.save()
+    for data in hw, student, teacher, hw_result:
+        data.save()
 
 
 class Migration(migrations.Migration):
