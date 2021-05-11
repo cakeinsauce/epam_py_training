@@ -6,30 +6,21 @@ of this element in the tree.
 Tree can only contains basic structures like:
     str, list, tuple, dict, set, int, bool
 """
-from typing import Any
-
-# Example tree:
-example_tree = {
-    "first": ["RED", "BLUE"],
-    "second": {
-        "simple_key": ["simple", "list", "of", "RED", "valued"],
-    },
-    "third": {
-        "abc": "BLUE",
-        "jhl": "RED",
-        "complex_key": {
-            "key1": "value1",
-            "key2": "RED",
-            "key3": ["a", "lot", "of", "values", {"nested_key": "RED"}],
-        },
-    },
-    "fourth": "RED",
-}
+from typing import Generator
 
 
-def find_occurrences(tree: dict, element: Any) -> int:
-    ...
+def find_occurrences(tree: dict, element: any) -> int:
+    """Return the element's number in the tree."""
 
+    def find_occurrences_gen(node: any, elem: any) -> Generator:
+        for v in (
+            node.values() if isinstance(node, dict) else node
+        ):  # Iter over dict or list values.
+            if v == elem:  # Match
+                yield v
+            elif isinstance(v, (list, tuple, set)):  # Value is list, tuple or set.
+                yield from find_occurrences_gen(v, elem)
+            elif isinstance(v, dict):  # Value is a dict.
+                yield from find_occurrences_gen(v.values(), elem)
 
-if __name__ == "__main__":
-    print(find_occurrences(example_tree, "RED"))  # 6
+    return len(list(find_occurrences_gen(tree, element)))
