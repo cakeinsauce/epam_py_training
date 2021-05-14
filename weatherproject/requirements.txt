@@ -1,0 +1,13 @@
+pre-commit
+black
+isort
+pytest
+pytest-sugar
+django
+pyowm
+python-dotenv
+django-redis
+psycopg2
+docker
+docker-compose
+celery
