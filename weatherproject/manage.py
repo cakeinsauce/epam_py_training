@@ -3,10 +3,6 @@
 import os
 import sys
 
-from dotenv import load_dotenv
-
-load_dotenv()  # Loading env variables from .env
-
 
 def main():
     """Run administrative tasks."""
