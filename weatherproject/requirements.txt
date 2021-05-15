@@ -5,6 +5,7 @@ pytest
 pytest-sugar
 python-dateutil
 django
+djangorestframework
 pyowm
 python-dotenv
 django-redis

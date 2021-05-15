@@ -34,12 +34,12 @@ def get_city_forecaster(city: str) -> Optional[ForecastOWM]:
         city_forecaster = mgr.forecast_at_place(city, "3h").forecast
     except excOWM.InvalidSSLCertificateError:
         print("Wrong OWM API token.")
-    except excOWM.APIRequestError:
-        print("Network failure.")
+    # except excOWM.APIRequestError:
+    #     print("Network failure.")
     except excOWM.UnauthorizedError:
         print("OWM subscription insufficient capabilities.")
-    except excOWM.NotFoundError:
-        print("Unable to find the city.")
+    # except excOWM.NotFoundError:
+    #     print("Unable to find the city.")
     finally:
         return city_forecaster
 

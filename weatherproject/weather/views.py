@@ -23,10 +23,10 @@ def city_weather(request: HttpRequest, city: str) -> HttpResponse:
     city_forecaster = get_city_forecaster(city)
     units = request.GET.get("u", "celsius")
     city_forecast = get_city_forecasts_five_days(city_forecaster, units)
-    # return HttpResponse(city_forecast)
-    return JsonResponse(
-        model_to_dict(city_forecast), safe=False, json_dumps_params={"indent": 4}
-    )
+    return HttpResponse(city_forecast)
+    # return JsonResponse(
+    #     model_to_dict(city_forecast), safe=False, json_dumps_params={"indent": 4}
+    # )
 
 
 def largest_cities_weather(request: HttpRequest) -> HttpResponse:
