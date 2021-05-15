@@ -3,6 +3,7 @@ black
 isort
 pytest
 pytest-sugar
+python-dateutil
 django
 pyowm
 python-dotenv
