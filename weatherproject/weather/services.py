@@ -1,15 +1,16 @@
 import csv
-import datetime
 import io
 import json
 import os
 import zipfile
+from datetime import datetime
 from typing import Dict, List, Optional, Union
 
 import requests
 from dateutil import parser
 from django.core import serializers
 from django.forms.models import model_to_dict
+from django.http import HttpResponse
 from pyowm.commons import exceptions as excOWM
 from pyowm.owm import OWM
 from pyowm.weatherapi25.forecast import Forecast as ForecastOWM
@@ -34,12 +35,12 @@ def get_city_forecaster(city: str) -> Optional[ForecastOWM]:
         city_forecaster = mgr.forecast_at_place(city, "3h").forecast
     except excOWM.InvalidSSLCertificateError:
         print("Wrong OWM API token.")
-    # except excOWM.APIRequestError:
-    #     print("Network failure.")
+    except excOWM.APIRequestError:
+        print("Network failure.")
     except excOWM.UnauthorizedError:
         print("OWM subscription insufficient capabilities.")
-    # except excOWM.NotFoundError:
-    #     print("Unable to find the city.")
+    except excOWM.NotFoundError:
+        print("Unable to find the city.")
     finally:
         return city_forecaster
 
@@ -60,15 +61,20 @@ def degrees_to_cardinal(deg: int) -> Optional[str]:
     return directions[val % 8]
 
 
-def get_city_forecasts_five_days(
-    forecast: ForecastOWM, units: str = "celsius"
+def parse_city_forecasts(
+    forecast: ForecastOWM,
+    units: str = "celsius",
+    datetime_start: datetime = datetime.min,
+    datetime_finish: datetime = datetime.max,
 ) -> Union[Forecast, dict]:
-    """Parse ForecastOWM of the city if it's found and return Forecast with forecasts.
+    """Parse ForecastOWM of the city if it's found and return Forecast with forecasts within a given period.
     Args:
         forecast: The location's Forecast object.
         units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
+        datetime_start: Forecast datetime finish. If not given, consider as min time for forecast
+        datetime_finish: Forecast datetime start. If not given, consider as max time for forecast
     Returns:
-        Return Forecast instance with forecasts of the place. If ForecastOWM is None, return empty dictionary.
+        Return Forecast instance with forecasts of the place within a given period. If ForecastOWM is None, return empty dictionary.
     """
     if forecast is None:
         return {}  # TODO: change that stupidity
@@ -79,7 +85,7 @@ def get_city_forecasts_five_days(
     forecasts = []
 
     for weather in forecast.weathers:
-        reference_time = parser.parse(weather.reference_time("iso"))
+        reference_time = parser.parse(weather.reference_time("iso"), ignoretz=True)
         weather_status = weather.detailed_status
         temperature = weather.temperature(units).get("temp", None)
         pressure = weather.pressure.get("press", None)
@@ -101,9 +107,10 @@ def get_city_forecasts_five_days(
             rain=rain,
             snow=snow,
         )
-        # TODO: find out how to remove primary keys from models if we don't store 'em in db.
-        dict_weather = model_to_dict(weather_model)
-        forecasts.append(dict_weather)
+
+        if datetime_start <= reference_time <= datetime_finish:
+            dict_weather = model_to_dict(weather_model)
+            forecasts.append(dict_weather)
 
     forecast_model = Forecast(
         reception_time=reception_time,
@@ -148,18 +155,71 @@ def get_largest_cities_toponyms(
     return largest_cities_toponyms
 
 
-# def get_cities_forecasts(cities_list: List[str], units: str = 'celsius') -> List[Forecast]:
-#     """Get list of forecasts for the given cities.
-#
-#     Args:
-#         units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
-#         cities_list: list of cities which forecasts are needed
-#
-#     Returns:
-#         Return list of forecasts for the given cities.
-#     """
-#     cities_forecasts = []
-#     for city in cities_list:
-#         city_forecaster = get_city_forecaster(city)
-#         cities_forecasts.append(get_city_forecasts_five_days(city_forecaster, units))
-#     return cities_forecasts
+def get_city_forecasts(
+    city: str,
+    units: str = "celsius",
+    datetime_start: datetime = datetime.min,
+    datetime_finish: datetime = datetime.max,
+) -> Union[Forecast, dict]:
+    """Get city forecast.
+
+    Args:
+        city: City's toponym.
+        units: Temperature unit
+        datetime_start: Forecast datetime finish. If not given, consider as min time for forecast
+        datetime_finish: Forecast datetime start. If not given, consider as max time for forecast.
+
+    Returns:
+        Forecast of the city
+    """
+    city_forecaster = get_city_forecaster(city)
+    return parse_city_forecasts(city_forecaster, units, datetime_start, datetime_finish)
+
+
+def get_cities_forecasts(
+    cities_list: List[str],
+    units: str = "celsius",
+    datetime_start: datetime = datetime.min,
+    datetime_finish: datetime = datetime.max,
+) -> List[Forecast]:
+    """Get list of forecasts for the given cities.
+
+    Args:
+        units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
+        cities_list: list of cities which forecasts are needed
+        datetime_start: Forecast datetime finish. If not given, consider as min time for forecast
+        datetime_finish: Forecast datetime start. If not given, consider as max time for forecast.
+    Returns:
+        Return list of forecasts for the given cities.
+    """
+    cities_forecasts = []
+    for city in cities_list:
+        cities_forecasts.append(
+            get_city_forecasts(city, units, datetime_start, datetime_finish)
+        )
+    return cities_forecasts
+
+
+def write_to_csv(cities_forecasts: List[Forecast], header: List[str]) -> HttpResponse:
+    """Write Forecast to HttpResponse text/csv.
+
+    Args:
+        header: header of .csv file
+        cities_forecasts: List of Forecast.
+
+    Returns:
+        Http response with .csv file of forecasts
+    """
+    csv_tms = datetime.now().strftime(
+        "%Y-%m-%d_%H-%M"
+    )  # Timestamp for a file name, ex.: 2021-05-15_04-20
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f"attachment; filename=cities_{csv_tms}.csv"
+    writer = csv.writer(response, delimiter=",")
+    writer.writerow(header)  # .csv header
+
+    for city in cities_forecasts:
+        writer.writerow(
+            [city.reception_time, city.location, city.units, city.forecasts]
+        )
+    return response

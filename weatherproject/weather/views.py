@@ -22,7 +22,7 @@ def city_weather(request: HttpRequest, city: str) -> HttpResponse:
     """
     city_forecaster = get_city_forecaster(city)
     units = request.GET.get("u", "celsius")
-    city_forecast = get_city_forecasts_five_days(city_forecaster, units)
+    city_forecast = parse_city_forecasts(city_forecaster, units)
     return HttpResponse(city_forecast)
     # return JsonResponse(
     #     model_to_dict(city_forecast), safe=False, json_dumps_params={"indent": 4}
@@ -43,7 +43,7 @@ def largest_cities_weather(request: HttpRequest) -> HttpResponse:
     cities_forecasts = []
     for city in cities_list:
         city_forecaster = get_city_forecaster(city)
-        cities_forecasts.append(get_city_forecasts_five_days(city_forecaster, units))
+        cities_forecasts.append(parse_city_forecasts(city_forecaster, units))
     return HttpResponse(cities_forecasts)
 
 
@@ -62,7 +62,7 @@ def csv_download(request: HttpRequest) -> HttpResponse:
     cities_forecasts = []
     for city in cities_list:
         city_forecaster = get_city_forecaster(city)
-        cities_forecasts.append(get_city_forecasts_five_days(city_forecaster, units))
+        cities_forecasts.append(parse_city_forecasts(city_forecaster, units))
     #### !!COPYPASTE FROM FUNC ABOVE. TEMPORARY!! ####
 
     response = HttpResponse(content_type="text/csv")
