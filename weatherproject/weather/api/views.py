@@ -1,26 +1,21 @@
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from ..services import *
 from .serializers import ForecastSerializer, RegistrationSerializer
 
 
-@api_view(
-    [
-        "GET",
-    ]
-)
+@api_view(["GET"])
+@permission_classes([AllowAny])
 def api_index(request) -> Response:
     """Index page API."""
     return Response({"message": "Simple as fukkk API weather service"})
 
 
-@api_view(
-    [
-        "GET",
-    ]
-)
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def api_city_weather(request, city: str) -> Response:
     """City forecast"""
     units = request.GET.get("u", "celsius")
@@ -51,11 +46,8 @@ def api_city_weather(request, city: str) -> Response:
         )
 
 
-@api_view(
-    [
-        "GET",
-    ]
-)
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def api_largest_cities_weather(request) -> Response:
     """Largest cities forecasts."""
     cities_list = get_largest_cities_toponyms(100)
@@ -87,17 +79,14 @@ def api_largest_cities_weather(request) -> Response:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-@api_view(
-    [
-        "GET",
-    ]
-)
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def api_largest_cities_weather_download(request) -> HttpResponse:
     """Download largest cities forecasts"""
     cities_list = get_largest_cities_toponyms(100)
     units = request.GET.get("u", "celsius")
-    start = request.GET.get("s", datetime.min)  # such format 2021-05-15_04-20
-    finish = request.GET.get("f", datetime.max)
+    start = request.GET.get("s", "0001-01-01_00-00")  # such format 2021-05-15_04-20
+    finish = request.GET.get("f", "9999-12-31_23-59")
 
     try:
         start = datetime.strptime(start, "%Y-%m-%d_%H-%M")
@@ -120,11 +109,8 @@ def api_largest_cities_weather_download(request) -> HttpResponse:
     return write_to_csv(cities_forecasts, header)
 
 
-@api_view(
-    [
-        "POST",
-    ]
-)
+@api_view(["POST"])
+@permission_classes([AllowAny])
 def api_registration(request) -> Response:
     """Register new user."""
     serializer = RegistrationSerializer(data=request.data)
