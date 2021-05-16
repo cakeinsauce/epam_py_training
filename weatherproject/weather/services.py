@@ -7,6 +7,7 @@ from typing import List, Optional, Union
 
 import requests
 from dateutil import parser
+from django.conf import settings
 from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from pyowm.commons import exceptions as excOWM
@@ -14,8 +15,6 @@ from pyowm.owm import OWM
 from pyowm.weatherapi25.forecast import Forecast as ForecastOWM
 
 from .models import Forecast, Weather
-
-API_KEY = os.getenv("API_KEY")  # Here's your API key from OpenWeatherMap
 
 
 def get_city_forecaster(city: str) -> Optional[ForecastOWM]:
@@ -25,7 +24,7 @@ def get_city_forecaster(city: str) -> Optional[ForecastOWM]:
     Returns:
         Return Forecast object if city's found, None otherwise.
     """
-    owm = OWM(API_KEY)
+    owm = OWM(settings.API_KEY)
     mgr = owm.weather_manager()
     city_forecaster = None
 

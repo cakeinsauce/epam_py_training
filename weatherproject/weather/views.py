@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.views.decorators.cache import cache_page
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
@@ -10,14 +12,15 @@ from .services import *
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def api_index(request) -> Response:
+def index(request) -> Response:
     """Index page API."""
     return Response({"message": "Simple as fukkk API weather service"})
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def api_city_weather(request, city: str) -> Response:
+@cache_page(settings.CACHE_TTL)
+def city_weather(request, city: str) -> Response:
     """City forecast"""
     units = request.GET.get("u", "celsius")
     start = request.GET.get("s", "0001-01-01_00-00")  # such format 2021-05-15_04-20
@@ -49,7 +52,7 @@ def api_city_weather(request, city: str) -> Response:
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def api_largest_cities_weather(request) -> Response:
+def largest_cities_weather(request) -> Response:
     """Largest cities forecasts."""
     cities_list = get_largest_cities_toponyms(100)
     units = request.GET.get("u", "celsius")
@@ -82,7 +85,7 @@ def api_largest_cities_weather(request) -> Response:
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def api_largest_cities_weather_download(request) -> HttpResponse:
+def largest_cities_weather_download(request) -> HttpResponse:
     """Download largest cities forecasts"""
     cities_list = get_largest_cities_toponyms(100)
     units = request.GET.get("u", "celsius")
@@ -112,7 +115,7 @@ def api_largest_cities_weather_download(request) -> HttpResponse:
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def api_registration(request) -> Response:
+def registration(request) -> Response:
     """Register new user."""
     serializer = RegistrationSerializer(data=request.data)
     data = {}

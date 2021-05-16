@@ -8,6 +8,7 @@ django
 djangorestframework
 pyowm
 python-dotenv
+redis
 django-redis
 psycopg2
 docker
