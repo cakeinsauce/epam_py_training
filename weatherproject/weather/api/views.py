@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from ..services import *
-from .serializers import ForecastSerializer
+from .serializers import ForecastSerializer, RegistrationSerializer
 
 
 @api_view(
@@ -118,3 +118,28 @@ def api_largest_cities_weather_download(request) -> HttpResponse:
     header = ["reception_time", "location", "units", "forecasts"]
 
     return write_to_csv(cities_forecasts, header)
+
+
+@api_view(
+    [
+        "POST",
+    ]
+)
+def api_registration(request) -> Response:
+    """Register new user."""
+    serializer = RegistrationSerializer(data=request.data)
+    data = {}
+    if serializer.is_valid():
+        account = serializer.save()
+        data["status"] = "new user has been created"
+        data["email"] = account.email
+        data["username"] = account.username
+    else:
+        data = serializer.errors
+    return Response(data)
+
+
+# {"email": "denis@mail.com",
+# "username": "bruh",
+# "password": "bruuh",
+# "password2": "bruuh"}

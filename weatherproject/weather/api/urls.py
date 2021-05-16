@@ -9,7 +9,8 @@ app_name = "weather"
 
 urlpatterns = [
     path("", api_index),
+    path("register", api_registration),
     path("cities/", api_largest_cities_weather),
     path("cities/download/", api_largest_cities_weather_download),
-    path("<str:city>/", api_city_weather),
+    path("weather/<str:city>/", api_city_weather),
 ]
