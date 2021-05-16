@@ -134,6 +134,8 @@ def api_registration(request) -> Response:
         data["status"] = "new user has been created"
         data["email"] = account.email
         data["username"] = account.username
+        token = Token.objects.get(user=account).key
+        data["auth_token"] = token
     else:
         data = serializer.errors
     return Response(data)
