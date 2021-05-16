@@ -44,6 +44,8 @@ class Forecast(models.Model):
 
 
 class AccountManager(BaseUserManager):
+    """Custom user account manager"""
+
     def create_user(self, email, username, password=None):
         if not email:
             raise ValueError("Users must have an email address")
@@ -73,7 +75,7 @@ class AccountManager(BaseUserManager):
 
 
 class Account(AbstractBaseUser):
-    """User account model."""
+    """Custom user account model."""
 
     email = models.EmailField(max_length=60, unique=True)
     username = models.CharField(max_length=30, unique=True)
@@ -96,12 +98,13 @@ class Account(AbstractBaseUser):
     def has_perm(self, perm, obj=None):
         return self.is_admin
 
-    # Does this user have permission to view this app? (ALWAYS YES FOR SIMPLICITY)
+    # Does this user have permission to view this app
     def has_module_perms(self, app_label):
         return True
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
+    """Create auth token of user when register."""
     if created:
         Token.objects.create(user=instance)

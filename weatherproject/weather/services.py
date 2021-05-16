@@ -1,21 +1,19 @@
 import csv
 import io
-import json
 import os
 import zipfile
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import requests
 from dateutil import parser
-from django.core import serializers
 from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from pyowm.commons import exceptions as excOWM
 from pyowm.owm import OWM
 from pyowm.weatherapi25.forecast import Forecast as ForecastOWM
 
-from .models import *
+from .models import Forecast, Weather
 
 API_KEY = os.getenv("API_KEY")  # Here's your API key from OpenWeatherMap
 

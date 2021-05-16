@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ..models import Account, Forecast
+from .models import Account, Forecast
 
 
 class ForecastSerializer(serializers.ModelSerializer):
