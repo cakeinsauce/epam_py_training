@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.cache import cache_page
@@ -13,6 +11,7 @@ from rest_framework.response import Response
 from .serializers import ForecastSerializer, RegistrationSerializer
 from .services import (get_cities_forecasts_for_period, get_city_forecasts,
                        get_from_cache, write_to_csv)
+from .utils import period_params_validate, temp_param_validate
 
 # fmt: on
 
@@ -22,7 +21,7 @@ from .services import (get_cities_forecasts_for_period, get_city_forecasts,
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def index(request) -> Response:
-    """Index page API."""
+    """Index page."""
     return Response({"message": "Simple as fukkk API weather service"})
 
 
@@ -49,13 +48,7 @@ def registration(request) -> Response:
 @cache_page(settings.CACHE_TTL)
 def city_weather(request, city: str) -> Response:
     """City forecast"""
-    units = request.GET.get("u", "celsius")
-
-    if units not in ("celsius", "fahrenheit"):
-        return Response(
-            {"status": "wrong temperature units, try 'celsius' or 'fahrenheit'"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+    units = temp_param_validate(request.GET.dict())
     city_forecast = get_city_forecasts(city, units)
 
     try:
@@ -72,26 +65,12 @@ def city_weather(request, city: str) -> Response:
 @cache_page(settings.CACHE_TTL)
 def largest_cities_weather_download(request) -> HttpResponse:
     """Download largest cities forecasts"""
-    units = request.GET.get("u", "celsius")
-    start = request.GET.get("s", "0001-01-01_00-00")  # such format 2021-05-15_04-20
-    finish = request.GET.get("f", "9999-12-31_23-59")
-    try:
-        start = datetime.strptime(start, "%Y-%m-%d_%H-%M")
-        finish = datetime.strptime(finish, "%Y-%m-%d_%H-%M")
-    except ValueError:
-        return Response(
-            {"message": "wrong datetime format, try YYYY-MM-DD_hh-mm"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    if units not in ("celsius", "fahrenheit"):
-        return Response(
-            {"message": "wrong temperature units, try 'celsius' or 'fahrenheit'"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+    params = request.GET.dict()
+    units = temp_param_validate(params)
+    start, finish = period_params_validate(params)
 
     cities_forecasts_from_cache = get_from_cache("cities_forecasts")
-    print(cities_forecasts_from_cache)
+
     try:
         cities_forecasts = get_cities_forecasts_for_period(
             cities_forecasts_from_cache, start, finish, units

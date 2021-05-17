@@ -72,7 +72,8 @@ def parse_city_forecasts(
         units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
 
     Returns:
-        Return Forecast instance with forecasts of the place within a given period. If ForecastOWM is None, return empty dictionary.
+        Return Forecast instance with forecasts of the place within a given period.
+        If ForecastOWM is None, return empty dictionary.
     """
     if forecast is None:
         return {}  # TODO: change that stupidity
@@ -88,7 +89,7 @@ def parse_city_forecasts(
         temperature = weather.temperature(units).get("temp", None)
         pressure = weather.pressure.get("press", None)
         wind = weather.wind()
-        wind_speed = wind.get("speed")
+        wind_speed = wind.get("speed", None)
         wind_direction = degrees_to_cardinal(wind.get("deg", None))
         humidity = weather.humidity
         rain = weather.rain.get("3h", 0)
@@ -116,40 +117,6 @@ def parse_city_forecasts(
         forecasts=forecasts,
     )
     return forecast_model
-
-
-def get_largest_cities_toponyms(
-    cities_amount: int = 100, csv_name: str = "worldcities.csv"
-) -> List[str]:
-    """Extract most populated cities toponyms from .csv file inside of a .zip.
-
-    Args:
-        cities_amount: Amount of largest cities to extract. Defaults to 100.
-        csv_name: csv-file name. Defaults to "worldcities.csv"
-
-    Returns:
-        List of 100 largest cities in descending order.
-    """
-    url = "https://simplemaps.com/static/data/world-cities/basic/simplemaps_worldcities_basicv1.73.zip"
-
-    with requests.get(
-        url, allow_redirects=True
-    ) as request:  # Download .zip with .csv data.
-        with open("cities.zip", "wb") as writer:
-            writer.write(request.content)
-
-    with zipfile.ZipFile("cities.zip") as archive:  # Extract .csv file from .zip
-        archive.extract(csv_name)
-
-    with io.open(csv_name, encoding="utf-8", newline="") as csv_file:
-        reader = csv.reader(csv_file, delimiter=",")
-        reader.__next__()  # Skip header of csv.
-        largest_cities_toponyms = [reader.__next__()[1] for _ in range(cities_amount)]
-
-    os.remove(csv_name)
-    os.remove("cities.zip")
-
-    return largest_cities_toponyms
 
 
 def get_city_forecasts(
@@ -197,9 +164,7 @@ def get_cities_forecasts_for_period(
     """
     fahrenheit = False
 
-    if (
-        cities_forecasts is None
-    ):  # Cities forecasts are not cached. Run celery and celery-beat!
+    if cities_forecasts is None:
         raise RuntimeError
 
     if units == "fahrenheit":
@@ -250,3 +215,37 @@ def write_to_csv(cities_forecasts: List[Forecast]) -> HttpResponse:
         )
 
     return response
+
+
+def get_largest_cities_toponyms(
+    cities_amount: int = 100, csv_name: str = "worldcities.csv"
+) -> List[str]:
+    """Extract most populated cities toponyms from .csv file inside of a .zip.
+
+    Args:
+        cities_amount: Amount of largest cities to extract. Defaults to 100.
+        csv_name: csv-file name. Defaults to "worldcities.csv"
+
+    Returns:
+        List of 100 largest cities in descending order.
+    """
+    url = "https://simplemaps.com/static/data/world-cities/basic/simplemaps_worldcities_basicv1.73.zip"
+
+    with requests.get(
+        url, allow_redirects=True
+    ) as request:  # Download .zip with .csv data.
+        with open("cities.zip", "wb") as writer:
+            writer.write(request.content)
+
+    with zipfile.ZipFile("cities.zip") as archive:  # Extract .csv file from .zip
+        archive.extract(csv_name)
+
+    with io.open(csv_name, encoding="utf-8", newline="") as csv_file:
+        reader = csv.reader(csv_file, delimiter=",")
+        reader.__next__()  # Skip header of csv.
+        largest_cities_toponyms = [reader.__next__()[1] for _ in range(cities_amount)]
+
+    os.remove(csv_name)
+    os.remove("cities.zip")
+
+    return largest_cities_toponyms
