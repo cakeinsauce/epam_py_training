@@ -14,6 +14,8 @@ app.autodiscover_tasks()
 
 now = datetime.now()
 
+# Cron strings for scheduler with offset.
+
 cron_minute = str(now.minute + 1)
 cron_hour = str(now.hour)
 cron_day = str(now.day)
@@ -28,6 +30,7 @@ app.conf.beat_schedule = {
             day_of_month=cron_day,
             month_of_year=cron_month,
         ),
+        "args": (100,),
     },
     "largest_cities_caching": {
         "task": "weather.tasks.cache_cities_forecasts",

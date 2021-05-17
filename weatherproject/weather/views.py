@@ -21,6 +21,7 @@ def index(request) -> Response:
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+@cache_page(settings.CACHE_TTL)
 def city_weather(request, city: str) -> Response:
     """City forecast"""
     units = request.GET.get("u", "celsius")
@@ -53,6 +54,7 @@ def city_weather(request, city: str) -> Response:
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+@cache_page(settings.CACHE_TTL)
 def largest_cities_weather_download(request) -> HttpResponse:
     """Download largest cities forecasts"""
     units = request.GET.get("u", "celsius")
@@ -73,7 +75,7 @@ def largest_cities_weather_download(request) -> HttpResponse:
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    cities_forecasts = get_cities_forecasts()
+    cities_forecasts = get_cities_forecasts_from_cache()
 
     return write_to_csv(cities_forecasts, start, finish, units)
 
