@@ -14,7 +14,7 @@ app.autodiscover_tasks()
 
 now = datetime.now()
 
-cron_minute = str(now.minute + 2)
+cron_minute = str(now.minute + 1)
 cron_hour = str(now.hour)
 cron_day = str(now.day)
 cron_month = str(now.month)

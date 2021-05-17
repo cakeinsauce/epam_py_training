@@ -9,6 +9,8 @@ from rest_framework.response import Response
 from .serializers import ForecastSerializer, RegistrationSerializer
 from .services import *
 
+# TODO: Find out what to do with query params validation and exceptions
+
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -51,46 +53,11 @@ def city_weather(request, city: str) -> Response:
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def largest_cities_weather(request) -> Response:
-    """Largest cities forecasts."""
-    cities_num = 100
-    units = request.GET.get("u", "celsius")
-    start = request.GET.get("s", "0001-01-01_00-00")  # such format 2021-05-15_04-20
-    finish = request.GET.get("f", "9999-12-31_23-59")
-
-    try:
-        start = datetime.strptime(start, "%Y-%m-%d_%H-%M")
-        finish = datetime.strptime(finish, "%Y-%m-%d_%H-%M")
-    except ValueError:
-        return Response(
-            {"status": "wrong datetime format, try YYYY-MM-DD_hh-mm"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    if units not in ("celsius", "fahrenheit"):
-        return Response(
-            {"status": "temperature units, try 'celsius' or 'fahrenheit'"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    cities_forecasts = get_cities_forecasts(cities_num, units, start, finish)
-
-    try:
-        serializer = ForecastSerializer(cities_forecasts, many=True)
-        return Response(serializer.data)
-    except KeyError:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
 def largest_cities_weather_download(request) -> HttpResponse:
     """Download largest cities forecasts"""
-    cities_num = 100
     units = request.GET.get("u", "celsius")
     start = request.GET.get("s", "0001-01-01_00-00")  # such format 2021-05-15_04-20
     finish = request.GET.get("f", "9999-12-31_23-59")
-
     try:
         start = datetime.strptime(start, "%Y-%m-%d_%H-%M")
         finish = datetime.strptime(finish, "%Y-%m-%d_%H-%M")
@@ -102,14 +69,13 @@ def largest_cities_weather_download(request) -> HttpResponse:
 
     if units not in ("celsius", "fahrenheit"):
         return Response(
-            {"status": "temperature units, try 'celsius' or 'fahrenheit'"},
+            {"status": "wrong temperature units, try 'celsius' or 'fahrenheit'"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    cities_forecasts = get_cities_forecasts(cities_num, units)
-    header = ["reception_time", "location", "units", "forecasts"]
+    cities_forecasts = get_cities_forecasts()
 
-    return write_to_csv(cities_forecasts, header, start, finish)
+    return write_to_csv(cities_forecasts, start, finish, units)
 
 
 @api_view(["POST"])
@@ -128,3 +94,36 @@ def registration(request) -> Response:
     else:
         data = serializer.errors
     return Response(data)
+
+
+# @api_view(["GET"])
+# @permission_classes([IsAuthenticated])
+# def largest_cities_weather(request) -> Response:
+#     """Largest cities forecasts."""
+#     cities_num = 100
+#     units = request.GET.get("u", "celsius")
+#     start = request.GET.get("s", "0001-01-01_00-00")  # such format 2021-05-15_04-20
+#     finish = request.GET.get("f", "9999-12-31_23-59")
+#
+#     try:
+#         start = datetime.strptime(start, "%Y-%m-%d_%H-%M")
+#         finish = datetime.strptime(finish, "%Y-%m-%d_%H-%M")
+#     except ValueError:
+#         return Response(
+#             {"status": "wrong datetime format, try YYYY-MM-DD_hh-mm"},
+#             status=status.HTTP_400_BAD_REQUEST,
+#         )
+#
+#     if units not in ("celsius", "fahrenheit"):
+#         return Response(
+#             {"status": "temperature units, try 'celsius' or 'fahrenheit'"},
+#             status=status.HTTP_400_BAD_REQUEST,
+#         )
+#
+#     cities_forecasts = get_cities_forecasts(cities_num, units, start, finish)
+#
+#     try:
+#         serializer = ForecastSerializer(cities_forecasts, many=True)
+#         return Response(serializer.data)
+#     except KeyError:
+#         return Response(status=status.HTTP_404_NOT_FOUND)

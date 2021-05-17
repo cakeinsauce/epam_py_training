@@ -203,40 +203,50 @@ def get_cities_forecasts(
 
 def write_to_csv(
     cities_forecasts: List[Forecast],
-    header: List[str],
     datetime_start: datetime,
     datetime_finish: datetime,
+    units: str = "celsius",
 ) -> HttpResponse:
     """Write Forecast to HttpResponse text/csv.
 
     Args:
-        header: header of .csv file.
         cities_forecasts: List of Forecast.
         datetime_start: Forecast datetime start.
         datetime_finish: Forecast datetime finish.
+        units: Forecast temperature units. Celsius and Fahrenheit are allowed. Defaults to celsius.
 
     Returns:
         Http response with .csv file of forecasts within given period
     """
+    header = ["reception_time", "location", "units", "forecasts"]
+    fahrenheit = False
 
     csv_tms = datetime.now().strftime(
         "%Y-%m-%d_%H-%M"
     )  # Timestamp for a file name, ex.: 2021-05-15_04-20
+
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = f"attachment; filename=cities_{csv_tms}.csv"
     writer = csv.writer(response, delimiter=",")
-    writer.writerow(header)  # .csv header
+    writer.writerow(header)
 
-    if cities_forecasts is None:
+    if (
+        cities_forecasts is None
+    ):  # Cities forecasts are not cached. Run celery and celery-beat!
         return HttpResponse(status=404)
 
+    if cities_forecasts[0].units != units:
+        fahrenheit = True
+
     for city in cities_forecasts:
-        city_forecasts = [
-            forecast
-            for forecast in city.forecasts
-            if datetime_start <= forecast["time"] <= datetime_finish
-        ]
-        writer.writerow(
-            [city.reception_time, city.location, city.units, city_forecasts]
-        )
+        city_forecasts = []
+        for forecast in city.forecasts:
+            if (
+                datetime_start <= forecast["time"] <= datetime_finish
+            ):  # If forecast within of the given time period.
+                if fahrenheit:  # Celsius to Fahrenheit.
+                    forecast["temperature"] = forecast["temperature"] * 9 / 5 + 32
+                city_forecasts.append(forecast)
+
+        writer.writerow([city.reception_time, city.location, units, city_forecasts])
     return response
