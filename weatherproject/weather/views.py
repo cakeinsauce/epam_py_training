@@ -53,7 +53,7 @@ def city_weather(request, city: str) -> Response:
 @permission_classes([IsAuthenticated])
 def largest_cities_weather(request) -> Response:
     """Largest cities forecasts."""
-    cities_list = get_largest_cities_toponyms(100)
+    cities_num = 100
     units = request.GET.get("u", "celsius")
     start = request.GET.get("s", "0001-01-01_00-00")  # such format 2021-05-15_04-20
     finish = request.GET.get("f", "9999-12-31_23-59")
@@ -73,7 +73,7 @@ def largest_cities_weather(request) -> Response:
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    cities_forecasts = get_cities_forecasts(cities_list, units, start, finish)
+    cities_forecasts = get_cities_forecasts(cities_num, units, start, finish)
 
     try:
         serializer = ForecastSerializer(cities_forecasts, many=True)
@@ -86,7 +86,7 @@ def largest_cities_weather(request) -> Response:
 @permission_classes([IsAuthenticated])
 def largest_cities_weather_download(request) -> HttpResponse:
     """Download largest cities forecasts"""
-    cities_list = get_largest_cities_toponyms(100)
+    cities_num = 100
     units = request.GET.get("u", "celsius")
     start = request.GET.get("s", "0001-01-01_00-00")  # such format 2021-05-15_04-20
     finish = request.GET.get("f", "9999-12-31_23-59")
@@ -106,7 +106,7 @@ def largest_cities_weather_download(request) -> HttpResponse:
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    cities_forecasts = get_cities_forecasts(cities_list, units, start, finish)
+    cities_forecasts = get_cities_forecasts(cities_num, units, start, finish)
     header = ["reception_time", "location", "units", "forecasts"]
 
     return write_to_csv(cities_forecasts, header)

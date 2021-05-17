@@ -179,7 +179,7 @@ def get_city_forecasts(
 
 
 def get_cities_forecasts(
-    cities_list: List[str],
+    cities_num: int = 100,
     units: str = "celsius",
     datetime_start: datetime = datetime.min,
     datetime_finish: datetime = datetime.max,
@@ -188,26 +188,16 @@ def get_cities_forecasts(
 
     Args:
         units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
-        cities_list: list of cities which forecasts are needed
+        cities_num: num of largest cities which forecasts are needed
         datetime_start: Forecast datetime finish. If not given, consider as min time for forecast
         datetime_finish: Forecast datetime start. If not given, consider as max time for forecast.
     Returns:
         Return list of forecasts for the given cities.
     """
-
-    if "cities_forecasts" in cache:  # Check if it's in cache
-        return cache.get("cities_forecasts")
-
-    cities_forecasts = []
-
-    for city in cities_list:
-        cities_forecasts.append(
-            get_city_forecasts(city, units, datetime_start, datetime_finish)
-        )
-
-    cache.set("cities_forecasts", cities_forecasts, timeout=settings.CACHE_CITIES_TTL)
-
-    return cities_forecasts
+    #
+    # if "cities_forecasts" not in cache:  # Check if it's in cache
+    #     cache_cities_forecasts(cities_num)
+    return cache.get("cities_forecasts")
 
 
 def write_to_csv(cities_forecasts: List[Forecast], header: List[str]) -> HttpResponse:
