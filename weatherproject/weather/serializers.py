@@ -4,12 +4,15 @@ from .models import Account, Forecast
 
 
 class ForecastSerializer(serializers.ModelSerializer):
+    """Forecast model serializer"""
+
     class Meta:
         model = Forecast
         fields = ["reception_time", "location", "units", "forecasts"]
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
+    """Registration model serializer"""
 
     password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
 

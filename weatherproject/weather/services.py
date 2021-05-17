@@ -23,7 +23,7 @@ def get_city_forecaster(city: str) -> Optional[ForecastOWM]:
     Args:
         city: The location's toponym. Add comma and 2-letter country code (ISO3166) to make it more precise.
     Returns:
-        Return Forecast object if city's found, None otherwise.
+        Return ForecastOWM object if city's found, None otherwise.
     """
     owm = OWM(settings.API_KEY)
     mgr = owm.weather_manager()
@@ -68,7 +68,7 @@ def parse_city_forecasts(
 ) -> Union[Forecast, dict]:
     """Parse ForecastOWM of the city if it's found and return Forecast with forecasts within a given period.
     Args:
-        forecast: The location's Forecast object.
+        forecast: The location's ForecastOWM object.
         units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
 
     Returns:
@@ -190,7 +190,7 @@ def get_cities_forecasts_for_period(
 
 
 def write_to_csv(cities_forecasts: List[Forecast]) -> HttpResponse:
-    """Write Forecast to HttpResponse text/csv.
+    """Write List of Forecasts to HttpResponse text/csv.
 
     Args:
         cities_forecasts: List of Forecast.
@@ -227,7 +227,7 @@ def get_largest_cities_toponyms(
         csv_name: csv-file name. Defaults to "worldcities.csv"
 
     Returns:
-        List of 100 largest cities in descending order.
+        List of n largest cities in descending order.
     """
     url = "https://simplemaps.com/static/data/world-cities/basic/simplemaps_worldcities_basicv1.73.zip"
 
