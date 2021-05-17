@@ -14,7 +14,6 @@ from django.http import HttpResponse
 from pyowm.commons import exceptions as excOWM
 from pyowm.owm import OWM
 from pyowm.weatherapi25.forecast import Forecast as ForecastOWM
-from rest_framework import status
 
 from .models import Forecast, Weather
 
@@ -31,7 +30,7 @@ def get_city_forecaster(city: str) -> Optional[ForecastOWM]:
     city_forecaster = None
 
     if city in cache:  # Check if it's in cache
-        return cache.get(city)
+        return get_from_cache(city)
 
     try:
         city_forecaster = mgr.forecast_at_place(city, "3h").forecast
@@ -65,17 +64,13 @@ def degrees_to_cardinal(deg: int) -> Optional[str]:
 
 
 def parse_city_forecasts(
-    forecast: ForecastOWM,
-    units: str = "celsius",
-    datetime_start: datetime = datetime.min,
-    datetime_finish: datetime = datetime.max,
+    forecast: ForecastOWM, units: str = "celsius"
 ) -> Union[Forecast, dict]:
     """Parse ForecastOWM of the city if it's found and return Forecast with forecasts within a given period.
     Args:
         forecast: The location's Forecast object.
         units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
-        datetime_start: Forecast datetime finish. If not given, consider as min time for forecast
-        datetime_finish: Forecast datetime start. If not given, consider as max time for forecast
+
     Returns:
         Return Forecast instance with forecasts of the place within a given period. If ForecastOWM is None, return empty dictionary.
     """
@@ -111,9 +106,8 @@ def parse_city_forecasts(
             snow=snow,
         )
 
-        if datetime_start <= reference_time <= datetime_finish:
-            dict_weather = model_to_dict(weather_model)
-            forecasts.append(dict_weather)
+        dict_weather = model_to_dict(weather_model)
+        forecasts.append(dict_weather)
 
     forecast_model = Forecast(
         reception_time=reception_time,
@@ -161,30 +155,35 @@ def get_largest_cities_toponyms(
 def get_city_forecasts(
     city: str,
     units: str = "celsius",
-    datetime_start: datetime = datetime.min,
-    datetime_finish: datetime = datetime.max,
 ) -> Union[Forecast, dict]:
     """Get city forecast.
 
     Args:
         city: City's toponym.
         units: Temperature unit
-        datetime_start: Forecast datetime finish. If not given, consider as min time for forecast
-        datetime_finish: Forecast datetime start. If not given, consider as max time for forecast.
 
     Returns:
         Forecast of the city
     """
     city_forecaster = get_city_forecaster(city)
-    return parse_city_forecasts(city_forecaster, units, datetime_start, datetime_finish)
+    return parse_city_forecasts(city_forecaster, units)
 
 
-def get_cities_forecasts_from_cache_for_period(
-    datetime_start: datetime, datetime_finish: datetime, units: str = "celsius"
+def get_from_cache(key_name: str):
+    """Get value from cache."""
+    return cache.get(key_name)
+
+
+def get_cities_forecasts_for_period(
+    cities_forecasts: List[Forecast],
+    datetime_start: datetime,
+    datetime_finish: datetime,
+    units: str = "celsius",
 ) -> List[Forecast]:
-    """Get list of forecasts for the given cities.
+    """Get list of forecasts for the given cities within period.
 
     Args:
+        cities_forecasts: List of forecasts to be processed.
         datetime_start: Forecast datetime start.
         datetime_finish: Forecast datetime finish.
         units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
@@ -193,11 +192,10 @@ def get_cities_forecasts_from_cache_for_period(
         List of cities' forecasts within given period in given temperature unit.
 
     Raises:
-        RuntimeError: If cities' forecasts are not in cache yet.
+        RuntimeError: If cities' forecasts are None.
 
     """
     fahrenheit = False
-    cities_forecasts = cache.get("cities_forecasts")
 
     if (
         cities_forecasts is None
@@ -216,7 +214,9 @@ def get_cities_forecasts_from_cache_for_period(
                 datetime_start <= forecast["time"] <= datetime_finish
             ):  # If forecast within of the given time period.
                 if fahrenheit:  # Celsius to Fahrenheit.
-                    forecast["temperature"] = forecast["temperature"] * 9 / 5 + 32
+                    forecast["temperature"] = round(
+                        forecast["temperature"] * 9 / 5 + 32, 1
+                    )
                 city_forecasts.append(forecast)
         city.units = units
         city.forecasts = city_forecasts

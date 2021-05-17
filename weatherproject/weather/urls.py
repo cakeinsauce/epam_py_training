@@ -12,7 +12,6 @@ urlpatterns = [
     path("", index),
     path("register", registration),
     path("login", obtain_auth_token),
-    # path("cities/", largest_cities_weather),
     path("cities/download/", largest_cities_weather_download),
     path("weather/<str:city>/", city_weather),
 ]
