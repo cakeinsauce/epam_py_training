@@ -34,6 +34,3 @@ def cache_cities_forecasts(
         )
 
     cache.set("cities_forecasts", cities_forecasts, timeout=settings.CACHE_CITIES_TTL)
-
-
-cache_cities_forecasts(100)

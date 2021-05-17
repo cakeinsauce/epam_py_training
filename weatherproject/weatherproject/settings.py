@@ -161,7 +161,7 @@ CACHES = {
 }
 
 CACHE_TTL = 60 * 1
-CACHE_CITIES_TTL = 60 * 60
+CACHE_CITIES_TTL = 60 * 65
 
 # Django Rest Framework settings
 
