@@ -8,6 +8,7 @@ from typing import List, Optional, Union
 import requests
 from dateutil import parser
 from django.conf import settings
+from django.core.cache import cache
 from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from pyowm.commons import exceptions as excOWM
@@ -18,7 +19,7 @@ from .models import Forecast, Weather
 
 
 def get_city_forecaster(city: str) -> Optional[ForecastOWM]:
-    """Search for a city and return its forecast object for the next 120.
+    """Search for a city and return its forecast object for the next 120 hours.
     Args:
         city: The location's toponym. Add comma and 2-letter country code (ISO3166) to make it more precise.
     Returns:
@@ -28,8 +29,13 @@ def get_city_forecaster(city: str) -> Optional[ForecastOWM]:
     mgr = owm.weather_manager()
     city_forecaster = None
 
+    if city in cache:  # Check if it's in cache
+        city_forecaster = cache.get(city)
+        return city_forecaster
+
     try:
         city_forecaster = mgr.forecast_at_place(city, "3h").forecast
+        cache.set(city, city_forecaster, timeout=settings.CACHE_TTL)
     except excOWM.InvalidSSLCertificateError:
         print("Wrong OWM API token.")
     except excOWM.APIRequestError:
@@ -189,6 +195,11 @@ def get_cities_forecasts(
     Returns:
         Return list of forecasts for the given cities.
     """
+
+    if "cities_forecasts" in cache:  # Check if it's in cache
+        city_forecaster = cache.get("cities_forecasts")
+        return city_forecaster
+
     cities_forecasts = []
     for city in cities_list:
         cities_forecasts.append(

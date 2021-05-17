@@ -19,7 +19,6 @@ def index(request) -> Response:
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-@cache_page(settings.CACHE_TTL)
 def city_weather(request, city: str) -> Response:
     """City forecast"""
     units = request.GET.get("u", "celsius")
