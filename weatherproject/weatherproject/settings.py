@@ -158,8 +158,8 @@ CACHES = {
     }
 }
 
-# Cache time to live is a minute.
 CACHE_TTL = 60 * 1
+CACHE_CITIES_TTL = 60 * 60
 
 # Django Rest Framework settings
 

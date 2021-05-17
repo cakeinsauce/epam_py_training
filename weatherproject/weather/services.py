@@ -30,8 +30,7 @@ def get_city_forecaster(city: str) -> Optional[ForecastOWM]:
     city_forecaster = None
 
     if city in cache:  # Check if it's in cache
-        city_forecaster = cache.get(city)
-        return city_forecaster
+        return cache.get(city)
 
     try:
         city_forecaster = mgr.forecast_at_place(city, "3h").forecast
@@ -197,14 +196,17 @@ def get_cities_forecasts(
     """
 
     if "cities_forecasts" in cache:  # Check if it's in cache
-        city_forecaster = cache.get("cities_forecasts")
-        return city_forecaster
+        return cache.get("cities_forecasts")
 
     cities_forecasts = []
+
     for city in cities_list:
         cities_forecasts.append(
             get_city_forecasts(city, units, datetime_start, datetime_finish)
         )
+
+    cache.set("cities_forecasts", cities_forecasts, timeout=settings.CACHE_CITIES_TTL)
+
     return cities_forecasts
 
 
