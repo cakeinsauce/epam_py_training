@@ -63,6 +63,27 @@ def city_weather(request, city: str) -> Response:
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 @cache_page(settings.CACHE_TTL)
+def largest_cities_weather(request) -> Response:
+    """Largest cities forecasts."""
+    params = request.GET.dict()
+    units = temp_param_validate(params)
+    start, finish = period_params_validate(params)
+
+    cities_forecasts_from_cache = get_from_cache("cities_forecasts")
+
+    try:
+        cities_forecasts = get_cities_forecasts_for_period(
+            cities_forecasts_from_cache, start, finish, units
+        )
+        serializer = ForecastSerializer(cities_forecasts, many=True)
+        return Response(serializer.data)
+    except (KeyError, RuntimeError):
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+@cache_page(settings.CACHE_TTL)
 def largest_cities_weather_download(request) -> HttpResponse:
     """Download largest cities forecasts"""
     params = request.GET.dict()
