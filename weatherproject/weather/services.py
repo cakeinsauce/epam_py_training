@@ -179,47 +179,35 @@ def get_city_forecasts(
     return parse_city_forecasts(city_forecaster, units, datetime_start, datetime_finish)
 
 
-def get_cities_forecasts_from_cache() -> List[Forecast]:
-    """Get list of forecasts for the given cities."""
-    return cache.get("cities_forecasts")
-
-
-def write_to_csv(
-    cities_forecasts: List[Forecast],
-    datetime_start: datetime,
-    datetime_finish: datetime,
-    units: str = "celsius",
-) -> HttpResponse:
-    """Write Forecast to HttpResponse text/csv.
+def get_cities_forecasts_from_cache_for_period(
+    datetime_start: datetime, datetime_finish: datetime, units: str = "celsius"
+) -> List[Forecast]:
+    """Get list of forecasts for the given cities.
 
     Args:
-        cities_forecasts: List of Forecast.
         datetime_start: Forecast datetime start.
         datetime_finish: Forecast datetime finish.
-        units: Forecast temperature unitzs. Celsius and Fahrenheit are allowed. Defaults to celsius.
+        units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
 
     Returns:
-        Http response with .csv file of forecasts within given period
+        List of cities' forecasts within given period in given temperature unit.
+
+    Raises:
+        RuntimeError: If cities' forecasts are not in cache yet.
+
     """
-    header = ["reception_time", "location", "units", "forecasts"]
     fahrenheit = False
-
-    csv_tms = datetime.now().strftime(
-        "%Y-%m-%d_%H-%M"
-    )  # Timestamp for a file name, ex.: 2021-05-15_04-20
-
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f"attachment; filename=cities_{csv_tms}.csv"
-    writer = csv.writer(response, delimiter=",")
-    writer.writerow(header)
+    cities_forecasts = cache.get("cities_forecasts")
 
     if (
         cities_forecasts is None
     ):  # Cities forecasts are not cached. Run celery and celery-beat!
-        return HttpResponse(status=404)
+        raise RuntimeError
 
-    if cities_forecasts[0].units != units:
+    if units == "fahrenheit":
         fahrenheit = True
+
+    forecasts = []
 
     for city in cities_forecasts:
         city_forecasts = []
@@ -230,6 +218,35 @@ def write_to_csv(
                 if fahrenheit:  # Celsius to Fahrenheit.
                     forecast["temperature"] = forecast["temperature"] * 9 / 5 + 32
                 city_forecasts.append(forecast)
+        city.units = units
+        city.forecasts = city_forecasts
+        forecasts.append(city)
+    return forecasts
 
-        writer.writerow([city.reception_time, city.location, units, city_forecasts])
+
+def write_to_csv(cities_forecasts: List[Forecast]) -> HttpResponse:
+    """Write Forecast to HttpResponse text/csv.
+
+    Args:
+        cities_forecasts: List of Forecast.
+
+    Returns:
+        Http response with .csv file of forecasts.
+    """
+    header = ["reception_time", "location", "units", "forecasts"]
+
+    csv_tms = datetime.now().strftime(
+        "%Y-%m-%d_%H-%M"
+    )  # Timestamp for a file name, ex.: 2021-05-15_04-20
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f"attachment; filename=cities_{csv_tms}.csv"
+    writer = csv.writer(response, delimiter=",")
+    writer.writerow(header)
+
+    for city in cities_forecasts:
+        writer.writerow(
+            [city.reception_time, city.location, city.units, city.forecasts]
+        )
+
     return response

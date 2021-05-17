@@ -32,7 +32,7 @@ def city_weather(request, city: str) -> Response:
         finish = datetime.strptime(finish, "%Y-%m-%d_%H-%M")
     except ValueError:
         return Response(
-            {"status": "wrong datetime format, try YYYY-MM-DD_hh-mm"},
+            {"message": "wrong datetime format, try YYYY-MM-DD_hh-mm"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -48,7 +48,7 @@ def city_weather(request, city: str) -> Response:
         return Response(serializer.data)
     except KeyError:
         return Response(
-            {"status": "cant find that city"}, status=status.HTTP_404_NOT_FOUND
+            {"message": "cant find that city"}, status=status.HTTP_404_NOT_FOUND
         )
 
 
@@ -65,19 +65,26 @@ def largest_cities_weather_download(request) -> HttpResponse:
         finish = datetime.strptime(finish, "%Y-%m-%d_%H-%M")
     except ValueError:
         return Response(
-            {"status": "wrong datetime format, try YYYY-MM-DD_hh-mm"},
+            {"message": "wrong datetime format, try YYYY-MM-DD_hh-mm"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
     if units not in ("celsius", "fahrenheit"):
         return Response(
-            {"status": "wrong temperature units, try 'celsius' or 'fahrenheit'"},
+            {"message": "wrong temperature units, try 'celsius' or 'fahrenheit'"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    cities_forecasts = get_cities_forecasts_from_cache()
+    try:
+        cities_forecasts = get_cities_forecasts_from_cache_for_period(
+            start, finish, units
+        )
+    except RuntimeError:  # Cities forecasts are not cached. Run celery and celery-beat!
+        return HttpResponse(
+            {"message": "cities data is not ready, try it later"}, status=404
+        )
 
-    return write_to_csv(cities_forecasts, start, finish, units)
+    return write_to_csv(cities_forecasts)
 
 
 @api_view(["POST"])
