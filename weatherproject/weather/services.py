@@ -14,6 +14,7 @@ from django.http import HttpResponse
 from pyowm.commons import exceptions as excOWM
 from pyowm.owm import OWM
 from pyowm.weatherapi25.forecast import Forecast as ForecastOWM
+from rest_framework import status
 
 from .models import Forecast, Weather
 
@@ -189,8 +190,8 @@ def get_cities_forecasts(
     Args:
         units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
         cities_num: num of largest cities which forecasts are needed
-        datetime_start: Forecast datetime finish. If not given, consider as min time for forecast
-        datetime_finish: Forecast datetime start. If not given, consider as max time for forecast.
+        datetime_start: Forecast datetime start. If not given, consider as min time for forecast
+        datetime_finish: Forecast datetime finish. If not given, consider as max time for forecast.
     Returns:
         Return list of forecasts for the given cities.
     """
@@ -200,16 +201,24 @@ def get_cities_forecasts(
     return cache.get("cities_forecasts")
 
 
-def write_to_csv(cities_forecasts: List[Forecast], header: List[str]) -> HttpResponse:
+def write_to_csv(
+    cities_forecasts: List[Forecast],
+    header: List[str],
+    datetime_start: datetime,
+    datetime_finish: datetime,
+) -> HttpResponse:
     """Write Forecast to HttpResponse text/csv.
 
     Args:
-        header: header of .csv file
+        header: header of .csv file.
         cities_forecasts: List of Forecast.
+        datetime_start: Forecast datetime start.
+        datetime_finish: Forecast datetime finish.
 
     Returns:
-        Http response with .csv file of forecasts
+        Http response with .csv file of forecasts within given period
     """
+
     csv_tms = datetime.now().strftime(
         "%Y-%m-%d_%H-%M"
     )  # Timestamp for a file name, ex.: 2021-05-15_04-20
@@ -218,8 +227,16 @@ def write_to_csv(cities_forecasts: List[Forecast], header: List[str]) -> HttpRes
     writer = csv.writer(response, delimiter=",")
     writer.writerow(header)  # .csv header
 
+    if cities_forecasts is None:
+        return HttpResponse(status=404)
+
     for city in cities_forecasts:
+        city_forecasts = [
+            forecast
+            for forecast in city.forecasts
+            if datetime_start <= forecast["time"] <= datetime_finish
+        ]
         writer.writerow(
-            [city.reception_time, city.location, city.units, city.forecasts]
+            [city.reception_time, city.location, city.units, city_forecasts]
         )
     return response

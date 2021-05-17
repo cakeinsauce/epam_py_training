@@ -106,10 +106,10 @@ def largest_cities_weather_download(request) -> HttpResponse:
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    cities_forecasts = get_cities_forecasts(cities_num, units, start, finish)
+    cities_forecasts = get_cities_forecasts(cities_num, units)
     header = ["reception_time", "location", "units", "forecasts"]
 
-    return write_to_csv(cities_forecasts, header)
+    return write_to_csv(cities_forecasts, header, start, finish)
 
 
 @api_view(["POST"])
