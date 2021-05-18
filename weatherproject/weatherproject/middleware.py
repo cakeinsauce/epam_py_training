@@ -13,4 +13,4 @@ class ExceptionMiddleware:
         """Base handler for exceptions in views"""
         print("Exception occurred while running.")
         print(f"Exception: {exception}")
-        return HttpResponse({"message": "Something went wrong"}, status=404)
+        return HttpResponse({"message": "Something went wrong"}, status=500)

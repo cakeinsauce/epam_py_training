@@ -2,45 +2,17 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.cache import cache_page
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 # fmt: off
-from .serializers import ForecastSerializer, RegistrationSerializer
-from .services import (get_cities_forecasts_for_period, get_city_forecasts,
-                       get_from_cache, write_to_csv)
-from .utils import period_params_validate, temp_param_validate
+from ..serializers import ForecastSerializer
+from ..services import (get_cities_forecasts_for_period, get_city_forecasts,
+                        get_from_cache, write_to_csv)
+from ..utils import period_params_validate, temp_param_validate
 
 # fmt: on
-
-# TODO: Find out what to do with query params validation and exceptions
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def index(request) -> Response:
-    """Index page."""
-    return Response({"message": "Simple as fukkk API weather service"})
-
-
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def registration(request) -> Response:
-    """Register new user."""
-    serializer = RegistrationSerializer(data=request.data)
-    data = {}
-    if serializer.is_valid():
-        account = serializer.save()
-        data["status"] = "new user has been created"
-        data["email"] = account.email
-        data["username"] = account.username
-        token = Token.objects.get(user=account).key
-        data["auth_token"] = token
-    else:
-        data = serializer.errors
-    return Response(data)
 
 
 @api_view(["GET"])

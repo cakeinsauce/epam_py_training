@@ -33,7 +33,7 @@ class Forecast(models.Model):
     reception_time = models.DateTimeField()
     location = models.JSONField(primary_key=True)
     units = models.CharField(max_length=11)
-    forecasts = ArrayField(models.JSONField())
+    forecasts = ArrayField(models.JSONField())  # TODO foreign key
 
     def __str__(self):
         return f"{self.reception_time} {self.location} {self.units} {self.forecasts}"
