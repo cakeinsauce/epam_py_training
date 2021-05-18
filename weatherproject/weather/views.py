@@ -50,7 +50,6 @@ def city_weather(request, city: str) -> Response:
     """City forecast"""
     units = temp_param_validate(request.GET.dict())
     city_forecast = get_city_forecasts(city, units)
-
     try:
         serializer = ForecastSerializer(city_forecast)
         return Response(serializer.data)
