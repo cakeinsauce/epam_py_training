@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 import os
 import zipfile
 from datetime import datetime
@@ -14,6 +15,7 @@ from django.http import HttpResponse
 from pyowm.commons import exceptions as excOWM
 from pyowm.owm import OWM
 from pyowm.weatherapi25.forecast import Forecast as ForecastOWM
+from rest_framework.utils.serializer_helpers import ReturnList
 
 from .models import Forecast, Weather
 
@@ -83,7 +85,7 @@ def parse_city_forecasts(
     city_forecasts = []
 
     for weather in forecast.weathers:
-        reference_time = parser.parse(weather.reference_time("iso"), ignoretz=False)
+        reference_time = parser.parse(weather.reference_time("iso"))
         weather_status = weather.detailed_status
         temperature = weather.temperature(units).get("temp", None)
         pressure = weather.pressure.get("press", None)
@@ -144,6 +146,16 @@ def save_city_forecasts_to_db(city_forecasts: List[Weather]) -> List[Weather]:
     return forecasts
 
 
+def get_many_to_many_instance(city: str, units: str = "celsius"):
+    """Saves model with many to many field and return it."""
+    model_info = get_city_forecasts(city)
+    city_model = model_info[0]
+    city_model.save()
+    city_model.forecasts.add(*save_city_forecasts_to_db(model_info[1]))
+
+    return city_model
+
+
 def get_from_cache(key_name: str):
     """Get value from cache."""
     return cache.get(key_name)
@@ -197,7 +209,7 @@ def get_cities_forecasts_for_period(
     return forecasts
 
 
-def write_to_csv(cities_forecasts: List[Forecast]) -> HttpResponse:
+def write_to_csv(cities_forecasts: ReturnList) -> HttpResponse:
     """Write List of Forecasts to HttpResponse text/csv.
 
     Args:
@@ -206,7 +218,7 @@ def write_to_csv(cities_forecasts: List[Forecast]) -> HttpResponse:
     Returns:
         Http response with .csv file of forecasts.
     """
-    header = ["reception_time", "location", "units", "forecasts"]
+    header = ["reception_time", "location", "unit", "forecasts"]
 
     csv_tms = datetime.now().strftime(
         "%Y-%m-%d_%H-%M"
@@ -214,11 +226,11 @@ def write_to_csv(cities_forecasts: List[Forecast]) -> HttpResponse:
 
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = f"attachment; filename=cities_{csv_tms}.csv"
-    writer = csv.writer(response, delimiter=",")
-    writer.writerow(header)
-
+    writer = csv.DictWriter(response, fieldnames=header)
+    writer.writeheader()
     for city in cities_forecasts:
-        writer.writerow([city.reception_time, city.location, city.unit, city.forecast])
+        city["forecasts"] = json.loads(json.dumps(city["forecasts"]))
+        writer.writerow(city)
 
     return response
 

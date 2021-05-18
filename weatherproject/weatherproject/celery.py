@@ -16,7 +16,7 @@ now = datetime.now()
 
 # Cron strings for scheduler with offset.
 
-cron_minute = str(now.minute + 1)
+cron_minute = str(now.minute + 2)
 cron_hour = str(now.hour)
 cron_day = str(now.day)
 cron_month = str(now.month)

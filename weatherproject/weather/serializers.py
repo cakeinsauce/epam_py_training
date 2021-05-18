@@ -24,7 +24,7 @@ class WeatherSerializer(serializers.ModelSerializer):
 class ForecastSerializer(serializers.ModelSerializer):
     """Forecast model serializer"""
 
-    forecast = WeatherSerializer(many=True, read_only=True)
+    forecasts = WeatherSerializer(many=True, read_only=True)
 
     class Meta:
         model = Forecast

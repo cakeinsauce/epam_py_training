@@ -4,6 +4,7 @@ isort
 pytest
 pytest-sugar
 python-dateutil
+pytz
 django
 djangorestframework
 pyowm

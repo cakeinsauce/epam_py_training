@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+
+import pytz
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.cache import cache_page
@@ -7,9 +10,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 # fmt: off
+from ..models import Forecast, Weather
 from ..serializers import ForecastSerializer
 from ..services import (get_cities_forecasts_for_period, get_city_forecasts,
-                        get_from_cache, write_to_csv)
+                        get_from_cache, get_many_to_many_instance,
+                        write_to_csv)
 from ..utils import period_params_validate, temp_param_validate
 
 # fmt: on
@@ -20,14 +25,17 @@ from ..utils import period_params_validate, temp_param_validate
 @cache_page(settings.CACHE_TTL)
 def city_weather(request, city: str) -> Response:
     """City forecast"""
-    units = temp_param_validate(request.GET.dict())
-    city_forecast = get_city_forecasts(city, units)
+    params = request.GET.dict()
+    units = temp_param_validate(params)
+    start, finish = period_params_validate(params)
+
+    city_forecast = get_many_to_many_instance(city)
     try:
         serializer = ForecastSerializer(city_forecast)
         return Response(serializer.data)
     except KeyError:
         return Response(
-            {"message": "cant find that city"}, status=status.HTTP_404_NOT_FOUND
+            {"message": "cant find that city"}, status=status.HTTP_400_BAD_REQUEST
         )
 
 
@@ -61,15 +69,14 @@ def largest_cities_weather_download(request) -> HttpResponse:
     units = temp_param_validate(params)
     start, finish = period_params_validate(params)
 
-    cities_forecasts_from_cache = get_from_cache("cities_forecasts")
-
     try:
-        cities_forecasts = get_cities_forecasts_for_period(
-            cities_forecasts_from_cache, start, finish, units
-        )
-    except RuntimeError:  # Cities forecasts are not cached. Run celery and celery-beat!
-        return HttpResponse(
-            {"message": "cities data is not ready, try it later"}, status=404
+        latest_hour = datetime.now(tz=pytz.utc) - timedelta(hours=1)
+        query = Forecast.objects.filter(reception_time__gte=latest_hour)[:100]
+    except Forecast.DoesNotExist:
+        return Response(
+            {"message": "cant find forecasts for that query"},
+            status=status.HTTP_404_NOT_FOUND,
         )
 
-    return write_to_csv(cities_forecasts)
+    serializer = ForecastSerializer(query, many=True)
+    return write_to_csv(serializer.data)

@@ -33,7 +33,7 @@ class Forecast(models.Model):
     reception_time = models.DateTimeField()
     location = models.JSONField()
     unit = models.CharField(max_length=11)
-    forecasts = models.ManyToManyField(Weather, related_name="weather")
+    forecasts = models.ManyToManyField(Weather, blank=True)
 
     def __str__(self):
         return f"{self.reception_time} {self.location} {self.unit} {self.forecasts}"
