@@ -23,17 +23,16 @@ cron_month = str(now.month)
 
 app.conf.beat_schedule = {
     "initial_largest_cities_caching": {
-        "task": "weather.tasks.cache_cities_forecasts",
+        "task": "weather.tasks.save_cities_forecasts",
         "schedule": crontab(
             minute=cron_minute,
             hour=cron_hour,
             day_of_month=cron_day,
             month_of_year=cron_month,
         ),
-        "args": (100,),
     },
     "largest_cities_caching": {
-        "task": "weather.tasks.cache_cities_forecasts",
+        "task": "weather.tasks.save_cities_forecasts",
         "schedule": 60 * 60,  # every hour
     },
 }

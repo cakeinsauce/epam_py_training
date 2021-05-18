@@ -1,12 +1,14 @@
 from celery import shared_task
-from django.conf import settings
-from django.core.cache import cache
 
-from .services import get_city_forecasts, get_largest_cities_toponyms
+# fmt: off
+from .services import (get_city_forecasts, get_largest_cities_toponyms,
+                       save_city_forecasts_to_db)
+
+# fmt: on
 
 
 @shared_task
-def cache_cities_forecasts(cities_num: int = 100) -> None:
+def save_cities_forecasts(cities_num: int = 100) -> None:
     """Caching list of forecasts for the n-largest cities.
 
     Args:
@@ -15,11 +17,12 @@ def cache_cities_forecasts(cities_num: int = 100) -> None:
     Returns:
         Cache list of forecasts for the given cities.
     """
-    cities_forecasts = []
-
     cities_list = get_largest_cities_toponyms(cities_num)
 
     for city in cities_list:
-        cities_forecasts.append(get_city_forecasts(city))
+        city_data = get_city_forecasts(city)
+        city_info = city_data[0]  # City info
+        city_forecasts = city_data[1]  # City forecasts
 
-    cache.set("cities_forecasts", cities_forecasts, timeout=settings.CACHE_CITIES_TTL)
+        city_info.save()
+        city_info.forecasts.add(*save_city_forecasts_to_db(city_forecasts))

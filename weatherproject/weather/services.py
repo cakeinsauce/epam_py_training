@@ -3,13 +3,13 @@ import io
 import os
 import zipfile
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple
 
 import requests
 from dateutil import parser
 from django.conf import settings
 from django.core.cache import cache
-from django.forms.models import model_to_dict
+from django.db import IntegrityError
 from django.http import HttpResponse
 from pyowm.commons import exceptions as excOWM
 from pyowm.owm import OWM
@@ -65,8 +65,8 @@ def degrees_to_cardinal(deg: int) -> Optional[str]:
 
 def parse_city_forecasts(
     forecast: ForecastOWM, units: str = "celsius"
-) -> Union[Forecast, dict]:
-    """Parse ForecastOWM of the city if it's found and return Forecast with forecasts within a given period.
+) -> Tuple[Forecast, List[Weather]]:
+    """Parse ForecastOWM of the city if it's found and return List of Forecast with forecasts.
     Args:
         forecast: The location's ForecastOWM object.
         units: Temperature unit. Celsius and Fahrenheit are allowed. Defaults to Celsius.
@@ -76,15 +76,14 @@ def parse_city_forecasts(
         If ForecastOWM is None, return empty dictionary.
     """
     if forecast is None:
-        return {}  # TODO: change that stupidity
+        return []
 
     reception_time = parser.parse(forecast.reception_time("iso"))
     location = forecast.location.to_dict()
-
-    forecasts = []
+    city_forecasts = []
 
     for weather in forecast.weathers:
-        reference_time = parser.parse(weather.reference_time("iso"), ignoretz=True)
+        reference_time = parser.parse(weather.reference_time("iso"), ignoretz=False)
         weather_status = weather.detailed_status
         temperature = weather.temperature(units).get("temp", None)
         pressure = weather.pressure.get("press", None)
@@ -107,22 +106,19 @@ def parse_city_forecasts(
             snow=snow,
         )
 
-        dict_weather = model_to_dict(weather_model)
-        forecasts.append(dict_weather)
+        city_forecasts.append(weather_model)
 
     forecast_model = Forecast(
-        reception_time=reception_time,
-        location=location,
-        units=units,
-        forecasts=forecasts,
+        reception_time=reception_time, location=location, unit=units
     )
-    return forecast_model
+
+    return forecast_model, city_forecasts
 
 
 def get_city_forecasts(
     city: str,
     units: str = "celsius",
-) -> Union[Forecast, dict]:
+) -> Tuple[Forecast, List[Weather]]:
     """Get city forecast.
 
     Args:
@@ -134,6 +130,18 @@ def get_city_forecasts(
     """
     city_forecaster = get_city_forecaster(city)
     return parse_city_forecasts(city_forecaster, units)
+
+
+def save_city_forecasts_to_db(city_forecasts: List[Weather]) -> List[Weather]:
+    """Saves city forecasts to db, helps with ManyToMany field."""
+    forecasts = []
+    for weather in city_forecasts:
+        try:
+            weather.save()
+            forecasts.append(weather)
+        except IntegrityError:
+            pass
+    return forecasts
 
 
 def get_from_cache(key_name: str):
@@ -210,9 +218,7 @@ def write_to_csv(cities_forecasts: List[Forecast]) -> HttpResponse:
     writer.writerow(header)
 
     for city in cities_forecasts:
-        writer.writerow(
-            [city.reception_time, city.location, city.units, city.forecasts]
-        )
+        writer.writerow([city.reception_time, city.location, city.unit, city.forecast])
 
     return response
 

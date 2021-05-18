@@ -17,4 +17,5 @@ urlpatterns = [
     path("cities/", largest_cities_weather),
     path("cities/download/", largest_cities_weather_download),
     path("weather/<str:city>/", city_weather),
+    # path("weather/<str:city>/<str:date>, city_weather_")
 ]

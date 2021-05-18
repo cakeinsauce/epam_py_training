@@ -1,14 +1,34 @@
 from rest_framework import serializers
 
-from .models import Account, Forecast
+from .models import Account, Forecast, Weather
+
+
+class WeatherSerializer(serializers.ModelSerializer):
+    """Weather model serializer"""
+
+    class Meta:
+        model = Weather
+        fields = [
+            "time",
+            "status",
+            "temperature",
+            "pressure",
+            "wind_speed",
+            "direction",
+            "humidity",
+            "rain",
+            "snow",
+        ]
 
 
 class ForecastSerializer(serializers.ModelSerializer):
     """Forecast model serializer"""
 
+    forecast = WeatherSerializer(many=True, read_only=True)
+
     class Meta:
         model = Forecast
-        fields = ["reception_time", "location", "units", "forecasts"]
+        fields = ["reception_time", "location", "unit", "forecasts"]
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -10,7 +9,7 @@ from rest_framework.authtoken.models import Token
 class Weather(models.Model):
     """Weather model"""
 
-    time = models.DateTimeField(primary_key=True)
+    time = models.DateTimeField()
     status = models.CharField(max_length=20)
     temperature = models.FloatField()
     pressure = models.FloatField()
@@ -24,23 +23,24 @@ class Weather(models.Model):
         return f"{self.time} {self.status} {self.temperature}"
 
     class Meta:
-        managed = False
+        # managed = True
+        ordering = ["time"]
 
 
 class Forecast(models.Model):
     """City forecast model."""
 
     reception_time = models.DateTimeField()
-    location = models.JSONField(primary_key=True)
-    units = models.CharField(max_length=11)
-    forecasts = ArrayField(models.JSONField())  # TODO foreign key
+    location = models.JSONField()
+    unit = models.CharField(max_length=11)
+    forecasts = models.ManyToManyField(Weather, related_name="weather")
 
     def __str__(self):
-        return f"{self.reception_time} {self.location} {self.units} {self.forecasts}"
+        return f"{self.reception_time} {self.location} {self.unit} {self.forecasts}"
 
     class Meta:
-        managed = False
-        unique_together = ("reception_time", "location")
+        # managed = True
+        ordering = ["reception_time"]
 
 
 class AccountManager(BaseUserManager):
